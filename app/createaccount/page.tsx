@@ -11,20 +11,18 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import Link from 'next/link';
 
-const LoginPage = () => {
-
+const CreateAccount = () => {
   return (
     <div className='container flex items-center justify-center mx-auto h-full rounded-[1rem]'>
       <Card className="w-full max-w-sm rounded-[1rem]">
         <CardHeader>
           <CardTitle>Bejelentkezés</CardTitle>
           <CardDescription>
-            Add meg az E-mail címed a bejelentkezéshez
-          </CardDescription>
+        aaaa
+    </CardDescription>
           <CardAction>
-            <Button variant="link"><Link href="/createaccount">Fiók létrehozása</Link></Button>
+            <Button variant="link">Fiók létrehozása</Button>
           </CardAction>
         </CardHeader>
         <CardContent>
@@ -44,7 +42,7 @@ const LoginPage = () => {
                   <Label htmlFor="password">Password</Label>
                   <a
                     href="#"
-                    className="ml-auto inline-block opacity-50 text-sm underline-offset-4 hover:underline"
+                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                   >
                     Forgot your password?
                   </a>
@@ -67,4 +65,4 @@ const LoginPage = () => {
   );
 };
 
-export default memo(LoginPage);
+export default memo(CreateAccount);
