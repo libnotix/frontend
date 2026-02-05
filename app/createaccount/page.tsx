@@ -1,3 +1,5 @@
+"use client";
+
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,9 +13,40 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm, SubmitHandler } from "react-hook-form";
+
+type Inputs = {
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+};
 
 const CreateAccount = () => {
+  const router = useRouter();
+  const { register, handleSubmit } = useForm<Inputs>();
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    try {
+      await handleRegister(data);
+      router.push("/login");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleRegister = async (data: Inputs) => {
+    const response = await fetch(
+      "https://unshrewish-mason-navigational.ngrok-free.dev/auth/register",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+    );
+    console.log(response);
+  };
+
   return (
     <div className="container flex items-center justify-center mx-auto h-full rounded-[1rem]">
       <Card className="w-full max-w-sm rounded-[1rem]">
@@ -22,7 +55,7 @@ const CreateAccount = () => {
           <CardDescription>Hozz létre egy új fiókot!</CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="lastName">Vezetéknév</Label>
@@ -30,7 +63,7 @@ const CreateAccount = () => {
                   id="lastName"
                   type="text"
                   placeholder="Minta"
-                  required
+                  {...register("lastName")}
                 />
               </div>
               <div className="grid gap-2">
@@ -39,7 +72,7 @@ const CreateAccount = () => {
                   id="firstName"
                   type="text"
                   placeholder="János"
-                  required
+                  {...register("firstName")}
                 />
               </div>
               <div className="grid gap-2">
@@ -48,7 +81,7 @@ const CreateAccount = () => {
                   id="email"
                   type="email"
                   placeholder="minta@gmail.com"
-                  required
+                  {...register("email")}
                 />
               </div>
               <div className="grid gap-2">
@@ -57,17 +90,17 @@ const CreateAccount = () => {
                   id="username"
                   type="text"
                   placeholder="MintaJanos"
-                  required
+                  {...register("username")}
                 />
+              </div>
+              <div className="gap-2 mt-5">
+                <Button type="submit" className="w-full">
+                  Regisztráció
+                </Button>
               </div>
             </div>
           </form>
         </CardContent>
-        <CardFooter className="flex-col gap-2">
-          <Button type="submit" className="w-full">
-            <Link href="/login">Regisztráció</Link>
-          </Button>
-        </CardFooter>
       </Card>
     </div>
   );
