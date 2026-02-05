@@ -28,8 +28,12 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <body 
         className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}
-      >
-        {children}
+    >
+      <div className="flex flex-1 ">
+        <div>Name placeholder</div>*
+      </div>
+
+
       </body>
     </html>
   );
