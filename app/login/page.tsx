@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useForm, Resolver } from "react-hook-form";
+import { useRouter } from "next/navigation";
 
 type FormValues = {
   email: string;
@@ -25,14 +26,14 @@ const resolver: Resolver<FormValues> = async (values) => {
   const errors: any = {};
 
   if (!values.email) {
-    errors.email = { 
-      type: "required", 
-      message: "Kötelező megadni az e-mail címet" 
+    errors.email = {
+      type: "required",
+      message: "Kötelező megadni az e-mail címet"
     };
   } else if (!emailRegex.test(values.email)) {
-    errors.email = { 
-      type: "pattern", 
-      message: "Érvénytelen e-mail formátum" 
+    errors.email = {
+      type: "pattern",
+      message: "Érvénytelen e-mail formátum"
     };
   }
 
@@ -46,8 +47,10 @@ const resolver: Resolver<FormValues> = async (values) => {
 const LoginPage = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({ resolver });
 
+  const router = useRouter();
+
   const onSubmit = async ({ email }: FormValues) => {
-    const res = await fetch("/api/auth/send-otp", {
+    const res = await fetch("https://unshrewish-mason-navigational.ngrok-free.dev/auth/login/start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
@@ -57,8 +60,6 @@ const LoginPage = () => {
       alert("Failed to send OTP");
       return;
     }
-
-    window.location.href = `/verify-otp?email=${email}`;
   };
 
   return (
@@ -82,8 +83,6 @@ const LoginPage = () => {
               {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
             </div>
           </CardContent>
-
-          
 
           <CardFooter>
             <Button type="submit" className="w-full">Login</Button>
