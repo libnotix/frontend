@@ -17,7 +17,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={cn(inter.variable, "min-h-full flex")} >
-      <body>
+      <body
+        className={`${inter.className} antialiased dark min-h-full w-full`}
+      >
         {children}
       </body>
     </html>
