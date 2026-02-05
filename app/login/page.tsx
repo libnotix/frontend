@@ -41,12 +41,12 @@ const LoginPage = () => {
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Jelszó</Label>
                   <a
                     href="#"
                     className="ml-auto inline-block opacity-50 text-sm underline-offset-4 hover:underline"
                   >
-                    Forgot your password?
+                    Elfelejtette a jelszavát?
                   </a>
                 </div>
                 <Input id="password" type="password" required />
@@ -56,10 +56,10 @@ const LoginPage = () => {
         </CardContent>
         <CardFooter className="flex-col gap-2">
           <Button type="submit" className="w-full">
-            Login
+            Bejelentkezés
           </Button>
           <Button variant="outline" className="w-full">
-            Login with Google
+            Bejelentkezés Google-al
           </Button>
         </CardFooter>
       </Card>
