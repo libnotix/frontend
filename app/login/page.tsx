@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useForm, Resolver } from "react-hook-form";
-import { useRouter } from "next/navigation";
 
 type FormValues = {
   email: string;
@@ -46,8 +45,6 @@ const resolver: Resolver<FormValues> = async (values) => {
 
 const LoginPage = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({ resolver });
-
-  const router = useRouter();
 
   const onSubmit = async ({ email }: FormValues) => {
     const res = await fetch("https://unshrewish-mason-navigational.ngrok-free.dev/auth/login/start", {
