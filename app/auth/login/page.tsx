@@ -173,6 +173,7 @@ const LoginPage = () => {
             </form>
           )}
         </CardContent>
+
         {step === "start" && (
           <CardFooter className="justify-center pb-6">
             <p className="text-sm text-muted-foreground">
