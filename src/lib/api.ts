@@ -1,7 +1,7 @@
 import { DefaultApi, Configuration, Middleware, ResponseContext, ErrorContext } from "../api";
 import { getAuthCookies, refreshTokenAction } from "../actions/auth";
 
-const BASE_PATH = process.env.NODE_ENV === "production" ? "https://unshrewish-mason-navigational.ngrok-free.dev" : "http://localhost:3020";
+const BASE_PATH = "https://tanarseged-b.vrolandd.hu/";
 
 const tokenRefreshMiddleware: Middleware = {
   onError: async (context: ErrorContext) => {
