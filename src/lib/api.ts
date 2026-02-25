@@ -1,7 +1,7 @@
 import { DefaultApi, Configuration, Middleware, ResponseContext, ErrorContext } from "../api";
 import { getAuthCookies, refreshTokenAction } from "../actions/auth";
 
-const BASE_PATH = "https://tanarseged-b.vrolandd.hu/";
+const BASE_PATH = "https://tanarseged-b.vrolandd.hu";
 
 const tokenRefreshMiddleware: Middleware = {
   onError: async (context: ErrorContext) => {
@@ -20,7 +20,7 @@ const tokenRefreshMiddleware: Middleware = {
              ...context.init,
              headers: {
                ...context.init.headers,
-               Authorization: `Bearer ${newToken}`,
+              Authorization: `Bearer ${newToken}`,
              },
            };
            return context.fetch(context.url, newInit);
@@ -45,7 +45,7 @@ export const getServerApi = async () => {
   
   const config = new Configuration({
     basePath: BASE_PATH,
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+   headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
   });
 
   return new DefaultApi(config);

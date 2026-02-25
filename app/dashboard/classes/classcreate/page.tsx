@@ -32,19 +32,39 @@ export default function CreateClass() {
     },
   })
 
-  const onSubmit = (data: FormValues) => {
-    console.log("Saving...", data)
-    router.push("/")
+  const onSubmit = async (data: FormValues) => {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+    // 2. Send the request to the /classes endpoint (standard naming)
+    const response = await fetch(`${baseUrl}/classes`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // Most backends need the token. Since this is a Client Component, 
+        // standard fetch will usually send cookies automatically if 
+        // the backend is on the same domain, or you might need:
+        // "Authorization": `Bearer ${token}` 
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Hiba a mentés során");
+    }
+
+    router.push("/dashboard/classes/classlist");
+    router.refresh();
+  } catch (error) {
+    console.error("Submission error:", error);
+    alert("Nem sikerült létrehozni az osztályt.");
   }
+};
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-white">
-      <nav className="w-full border-b border-white/10 bg-background">
-        <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
-          <span className="font-bold text-sm uppercase tracking-tight italic">Navbar</span>
-          <div className="w-8 h-8 rounded-full bg-[#262626]" />
-        </div>
-      </nav>
+
 
       <main className="flex-1 flex justify-center items-center p-6">
         <Card className="w-full max-w-md bg-[#0a0a0a] border border-[#262626] rounded-none shadow-none">
@@ -59,11 +79,11 @@ export default function CreateClass() {
                 <Label htmlFor="className" className="text-[11px] font-medium text-gray-400 ml-1">
                   Osztály neve
                 </Label>
-                <Input 
+                <Input
                   id="className"
-                  placeholder="Pl. 12.A" 
+                  placeholder="Pl. 12.A"
                   className={`bg-[#1c1c1c] border-[#262626] rounded-none text-sm text-white focus-visible:ring-1 focus-visible:ring-gray-500 transition-all ${errors.className ? "border-red-600" : ""}`}
-                  {...register("className")} 
+                  {...register("className")}
                 />
                 {errors.className && (
                   <p className="text-red-500 text-[10px] font-medium ml-1 italic">
@@ -76,24 +96,23 @@ export default function CreateClass() {
                 <Label htmlFor="description" className="text-[11px] font-medium text-gray-400 ml-1">
                   Leírás (opcionális)
                 </Label>
-                <Input 
+                <Input
                   id="description"
-                  placeholder="szoveg" 
+                  placeholder="szoveg"
                   className="bg-[#1c1c1c] border-[#262626] rounded-none text-sm text-white focus-visible:ring-1 focus-visible:ring-gray-500 transition-all"
-                  {...register("description")} 
+                  {...register("description")}
                 />
               </div>
 
               <div className="flex flex-col gap-3 pt-4">
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full bg-orange-400 text-black hover:bg-orange-500 rounded-none py-2 text-[12px] font-bold transition-colors"
                 >
                   Létrehozás
                 </Button>
-                
-                <Link 
-                  href="/" 
+                <Link
+                  href="/dashboard/classes/classlist"
                   className="w-full bg-[#1c1c1c] text-white py-2 rounded-none text-[12px] font-medium text-center hover:bg-[#262626] transition-colors"
                 >
                   Mégse

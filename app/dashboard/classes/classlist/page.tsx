@@ -28,12 +28,7 @@ export default function ClassList() {
 
   return (
     <div className="min-h-screen bg-background">
-      <nav className="sticky top-0 z-10 w-full border-b bg-background/80 backdrop-blur-md">
-        <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
-          <span className="font-bold text-lg tracking-tight">Navbar</span>
-          <div className="w-8 h-8 rounded-full bg-muted" />
-        </div>
-      </nav>
+      
 
       <main className="p-6">
         <div className="mx-auto max-w-7xl space-y-6">
@@ -75,14 +70,16 @@ export default function ClassList() {
             })}
           </div>
 
-          <Card
-            className="cursor-pointer border border-dashed border-border/60 bg-muted/30 shadow-none rounded-xl transition hover:border-primary/40 hover:bg-muted/50">
+          <Card 
+            className="mx-auto cursor-pointer flex items-center justify-center border border-solid border-border/60 bg-muted/30 shadow-none rounded-xl max-w-[300] max-h-[80] transition hover:border-primary/40 ">
+            <Link href={"/dashboard/classes/classcreate"} className="w-full h-full">
             <CardContent className="flex items-center justify-center py-6">
               <div className="text-muted-foreground text-sm font-medium flex items-center gap-2">
                 <span className="text-xl leading-none">+</span>
-                <Link href={"/classes/classcreate"}>Új osztály hozzáadása</Link>
+                Új osztály létrehozása
               </div>
             </CardContent>
+            </Link>
           </Card>
 
         </div>
