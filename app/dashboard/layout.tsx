@@ -2,6 +2,7 @@ import { getSession } from "@/lib/auth-server";
 import { AuthProvider } from "@/components/AuthProvider";
 import { redirect } from "next/navigation";
 import DashboardNavbar from "@/components/dashboard/Navbar";
+import Link from "next/link";
 
 export default async function DashboardLayout({
     children,
@@ -21,6 +22,8 @@ export default async function DashboardLayout({
             <AuthProvider user={session.user}>
                 {children}
             </AuthProvider>
+
+            <Link href="dashboard/classes/classcreate" className="w-100 h-100 border-1px-solid">gonb</Link>
         </div>
     );
 }
