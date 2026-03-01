@@ -15,18 +15,26 @@
 
 import * as runtime from '../runtime';
 import type {
+  AiQueryPost200Response,
   AuthLoginEndPost200Response,
   AuthLoginStartPost200Response,
   AuthRegisterPost400Response,
   AuthSessionGet200Response,
+  ClassesGet200Response,
+  ClassesPost201Response,
+  CreateClassRequest,
+  FreeQueryRequest,
   LoginEndRequest,
   LoginStartRequest,
   ModelApiResponse,
   RefreshRequest,
   RegisterRequest,
+  UpdateClassRequest,
   ValidationErrorResponse,
 } from '../models/index';
 import {
+    AiQueryPost200ResponseFromJSON,
+    AiQueryPost200ResponseToJSON,
     AuthLoginEndPost200ResponseFromJSON,
     AuthLoginEndPost200ResponseToJSON,
     AuthLoginStartPost200ResponseFromJSON,
@@ -35,6 +43,14 @@ import {
     AuthRegisterPost400ResponseToJSON,
     AuthSessionGet200ResponseFromJSON,
     AuthSessionGet200ResponseToJSON,
+    ClassesGet200ResponseFromJSON,
+    ClassesGet200ResponseToJSON,
+    ClassesPost201ResponseFromJSON,
+    ClassesPost201ResponseToJSON,
+    CreateClassRequestFromJSON,
+    CreateClassRequestToJSON,
+    FreeQueryRequestFromJSON,
+    FreeQueryRequestToJSON,
     LoginEndRequestFromJSON,
     LoginEndRequestToJSON,
     LoginStartRequestFromJSON,
@@ -45,9 +61,15 @@ import {
     RefreshRequestToJSON,
     RegisterRequestFromJSON,
     RegisterRequestToJSON,
+    UpdateClassRequestFromJSON,
+    UpdateClassRequestToJSON,
     ValidationErrorResponseFromJSON,
     ValidationErrorResponseToJSON,
 } from '../models/index';
+
+export interface AiQueryPostRequest {
+    freeQueryRequest: FreeQueryRequest;
+}
 
 export interface AuthLoginEndPostRequest {
     loginEndRequest: LoginEndRequest;
@@ -65,10 +87,68 @@ export interface AuthRegisterPostRequest {
     registerRequest: RegisterRequest;
 }
 
+export interface ClassesIdDeleteRequest {
+    id: number;
+}
+
+export interface ClassesIdGetRequest {
+    id: number;
+}
+
+export interface ClassesIdPutRequest {
+    id: number;
+    updateClassRequest: UpdateClassRequest;
+}
+
+export interface ClassesPostRequest {
+    createClassRequest: CreateClassRequest;
+}
+
 /**
  * 
  */
 export class DefaultApi extends runtime.BaseAPI {
+
+    /**
+     * Sends a free-form prompt to the Gemini model and returns the generated text response.
+     * Free Gemini AI query
+     */
+    async aiQueryPostRaw(requestParameters: AiQueryPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AiQueryPost200Response>> {
+        if (requestParameters['freeQueryRequest'] == null) {
+            throw new runtime.RequiredError(
+                'freeQueryRequest',
+                'Required parameter "freeQueryRequest" was null or undefined when calling aiQueryPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/ai/query`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: FreeQueryRequestToJSON(requestParameters['freeQueryRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => AiQueryPost200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Sends a free-form prompt to the Gemini model and returns the generated text response.
+     * Free Gemini AI query
+     */
+    async aiQueryPost(requestParameters: AiQueryPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AiQueryPost200Response> {
+        const response = await this.aiQueryPostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      * Complete login process (verify OTP)
@@ -260,6 +340,245 @@ export class DefaultApi extends runtime.BaseAPI {
      */
     async authSessionGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AuthSessionGet200Response> {
         const response = await this.authSessionGetRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Returns all school classes. Accessible by teachers and admins.
+     * List all school classes
+     */
+    async classesGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClassesGet200Response>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/classes`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ClassesGet200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns all school classes. Accessible by teachers and admins.
+     * List all school classes
+     */
+    async classesGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClassesGet200Response> {
+        const response = await this.classesGetRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Deletes a school class. Only accessible by admins.
+     * Delete a school class
+     */
+    async classesIdDeleteRaw(requestParameters: ClassesIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ModelApiResponse>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling classesIdDelete().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/classes/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ModelApiResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Deletes a school class. Only accessible by admins.
+     * Delete a school class
+     */
+    async classesIdDelete(requestParameters: ClassesIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ModelApiResponse> {
+        const response = await this.classesIdDeleteRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Returns a single school class. Accessible by teachers and admins.
+     * Get a school class by ID
+     */
+    async classesIdGetRaw(requestParameters: ClassesIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClassesPost201Response>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling classesIdGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/classes/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ClassesPost201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns a single school class. Accessible by teachers and admins.
+     * Get a school class by ID
+     */
+    async classesIdGet(requestParameters: ClassesIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClassesPost201Response> {
+        const response = await this.classesIdGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Updates a school class name. Teachers may only update classes they created. Admins may update any class. 
+     * Update a school class
+     */
+    async classesIdPutRaw(requestParameters: ClassesIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClassesPost201Response>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling classesIdPut().'
+            );
+        }
+
+        if (requestParameters['updateClassRequest'] == null) {
+            throw new runtime.RequiredError(
+                'updateClassRequest',
+                'Required parameter "updateClassRequest" was null or undefined when calling classesIdPut().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/classes/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UpdateClassRequestToJSON(requestParameters['updateClassRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ClassesPost201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Updates a school class name. Teachers may only update classes they created. Admins may update any class. 
+     * Update a school class
+     */
+    async classesIdPut(requestParameters: ClassesIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClassesPost201Response> {
+        const response = await this.classesIdPutRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates a new school class. Accessible by teachers and admins.
+     * Create a school class
+     */
+    async classesPostRaw(requestParameters: ClassesPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClassesPost201Response>> {
+        if (requestParameters['createClassRequest'] == null) {
+            throw new runtime.RequiredError(
+                'createClassRequest',
+                'Required parameter "createClassRequest" was null or undefined when calling classesPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/classes`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CreateClassRequestToJSON(requestParameters['createClassRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ClassesPost201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Creates a new school class. Accessible by teachers and admins.
+     * Create a school class
+     */
+    async classesPost(requestParameters: ClassesPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClassesPost201Response> {
+        const response = await this.classesPostRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

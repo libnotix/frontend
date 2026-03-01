@@ -4,14 +4,89 @@ All URIs are relative to *http://localhost:3000*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
+| [**aiQueryPost**](DefaultApi.md#aiquerypost) | **POST** /ai/query | Free Gemini AI query |
 | [**authLoginEndPost**](DefaultApi.md#authloginendpost) | **POST** /auth/login/end | Complete login process (verify OTP) |
 | [**authLoginStartPost**](DefaultApi.md#authloginstartpost) | **POST** /auth/login/start | Start login process (request OTP) |
 | [**authRefreshPost**](DefaultApi.md#authrefreshpost) | **POST** /auth/refresh | Refresh access token |
 | [**authRegisterPost**](DefaultApi.md#authregisterpost) | **POST** /auth/register | Register a new user |
 | [**authSessionGet**](DefaultApi.md#authsessionget) | **GET** /auth/session | Get current user session |
+| [**classesGet**](DefaultApi.md#classesget) | **GET** /classes | List all school classes |
+| [**classesIdDelete**](DefaultApi.md#classesiddelete) | **DELETE** /classes/{id} | Delete a school class |
+| [**classesIdGet**](DefaultApi.md#classesidget) | **GET** /classes/{id} | Get a school class by ID |
+| [**classesIdPut**](DefaultApi.md#classesidput) | **PUT** /classes/{id} | Update a school class |
+| [**classesPost**](DefaultApi.md#classespost) | **POST** /classes | Create a school class |
 | [**healthGet**](DefaultApi.md#healthget) | **GET** /health | Health check |
 | [**rootGet**](DefaultApi.md#rootget) | **GET** / | Home page |
 
+
+
+## aiQueryPost
+
+> AiQueryPost200Response aiQueryPost(freeQueryRequest)
+
+Free Gemini AI query
+
+Sends a free-form prompt to the Gemini model and returns the generated text response.
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { AiQueryPostRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new DefaultApi();
+
+  const body = {
+    // FreeQueryRequest
+    freeQueryRequest: ...,
+  } satisfies AiQueryPostRequest;
+
+  try {
+    const data = await api.aiQueryPost(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **freeQueryRequest** | [FreeQueryRequest](FreeQueryRequest.md) |  | |
+
+### Return type
+
+[**AiQueryPost200Response**](AiQueryPost200Response.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | AI response generated successfully |  -  |
+| **400** | Missing or invalid prompt |  -  |
+| **500** | AI generation error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
 
 ## authLoginEndPost
@@ -340,6 +415,368 @@ This endpoint does not need any parameter.
 |-------------|-------------|------------------|
 | **200** | Session retrieved successfully |  -  |
 | **401** | Invalid or missing token |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## classesGet
+
+> ClassesGet200Response classesGet()
+
+List all school classes
+
+Returns all school classes. Accessible by teachers and admins.
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { ClassesGetRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const config = new Configuration({ 
+    // Configure HTTP bearer authorization: bearerAuth
+    accessToken: "YOUR BEARER TOKEN",
+  });
+  const api = new DefaultApi(config);
+
+  try {
+    const data = await api.classesGet();
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+This endpoint does not need any parameter.
+
+### Return type
+
+[**ClassesGet200Response**](ClassesGet200Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | List of school classes |  -  |
+| **401** | Unauthorized |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## classesIdDelete
+
+> ModelApiResponse classesIdDelete(id)
+
+Delete a school class
+
+Deletes a school class. Only accessible by admins.
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { ClassesIdDeleteRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const config = new Configuration({ 
+    // Configure HTTP bearer authorization: bearerAuth
+    accessToken: "YOUR BEARER TOKEN",
+  });
+  const api = new DefaultApi(config);
+
+  const body = {
+    // number
+    id: 56,
+  } satisfies ClassesIdDeleteRequest;
+
+  try {
+    const data = await api.classesIdDelete(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **id** | `number` |  | [Defaults to `undefined`] |
+
+### Return type
+
+[**ModelApiResponse**](ModelApiResponse.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | School class deleted successfully |  -  |
+| **401** | Unauthorized |  -  |
+| **403** | Forbidden — only admins can delete classes |  -  |
+| **404** | School class not found |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## classesIdGet
+
+> ClassesPost201Response classesIdGet(id)
+
+Get a school class by ID
+
+Returns a single school class. Accessible by teachers and admins.
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { ClassesIdGetRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const config = new Configuration({ 
+    // Configure HTTP bearer authorization: bearerAuth
+    accessToken: "YOUR BEARER TOKEN",
+  });
+  const api = new DefaultApi(config);
+
+  const body = {
+    // number
+    id: 56,
+  } satisfies ClassesIdGetRequest;
+
+  try {
+    const data = await api.classesIdGet(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **id** | `number` |  | [Defaults to `undefined`] |
+
+### Return type
+
+[**ClassesPost201Response**](ClassesPost201Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | School class found |  -  |
+| **401** | Unauthorized |  -  |
+| **404** | School class not found |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## classesIdPut
+
+> ClassesPost201Response classesIdPut(id, updateClassRequest)
+
+Update a school class
+
+Updates a school class name. Teachers may only update classes they created. Admins may update any class. 
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { ClassesIdPutRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const config = new Configuration({ 
+    // Configure HTTP bearer authorization: bearerAuth
+    accessToken: "YOUR BEARER TOKEN",
+  });
+  const api = new DefaultApi(config);
+
+  const body = {
+    // number
+    id: 56,
+    // UpdateClassRequest
+    updateClassRequest: ...,
+  } satisfies ClassesIdPutRequest;
+
+  try {
+    const data = await api.classesIdPut(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **id** | `number` |  | [Defaults to `undefined`] |
+| **updateClassRequest** | [UpdateClassRequest](UpdateClassRequest.md) |  | |
+
+### Return type
+
+[**ClassesPost201Response**](ClassesPost201Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | School class updated successfully |  -  |
+| **400** | Invalid request body or validation error |  -  |
+| **401** | Unauthorized |  -  |
+| **403** | Forbidden — teacher tried to update another teacher\&#39;s class |  -  |
+| **404** | School class not found |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## classesPost
+
+> ClassesPost201Response classesPost(createClassRequest)
+
+Create a school class
+
+Creates a new school class. Accessible by teachers and admins.
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { ClassesPostRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const config = new Configuration({ 
+    // Configure HTTP bearer authorization: bearerAuth
+    accessToken: "YOUR BEARER TOKEN",
+  });
+  const api = new DefaultApi(config);
+
+  const body = {
+    // CreateClassRequest
+    createClassRequest: ...,
+  } satisfies ClassesPostRequest;
+
+  try {
+    const data = await api.classesPost(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **createClassRequest** | [CreateClassRequest](CreateClassRequest.md) |  | |
+
+### Return type
+
+[**ClassesPost201Response**](ClassesPost201Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **201** | School class created successfully |  -  |
+| **400** | Invalid request body or validation error |  -  |
+| **401** | Unauthorized |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
