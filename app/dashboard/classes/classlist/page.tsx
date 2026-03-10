@@ -7,11 +7,13 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
+import { getServerApi } from "@/lib/api"
+
 // Define the shape of your Class object
 type Class = {
-  id: string
+  id: number | string
   name: string
-  median: number
+  median?: number
 }
 
 type FormValues = {
@@ -29,27 +31,18 @@ export default function ClassList() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const token = localStorage.getItem("token")
+        const api = await getServerApi()
+        const response = await api.classesGet()
 
-        const response = await fetch(`https://tanarseged-b.vrolandd.hu/classes`, {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            "Content-Type": "application/json"
-          }
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-
-          const classesArray = Array.isArray(data) ? data : data.classes || []
-          reset({ classes: classesArray })
-        } else if (response.status === 401) {
-          console.error("Session expired")
-          router.push("/login") 
-        }
-      } catch (error) {
+        const classesArray = response.classes || []
+        // @ts-ignore - map to local shape
+        reset({ classes: classesArray })
+      } catch (error: any) {
         console.error("Failed to fetch classes:", error)
+        if (error?.response?.status === 401) {
+          console.error("Session expired")
+          router.push("/login")
+        }
       } finally {
         setLoading(false)
       }
@@ -57,14 +50,7 @@ export default function ClassList() {
 
     loadData()
   }, [reset, router])
-
   const classes = watch("classes")
-
-  const getMedianStyles = (median: number) => {
-    if (median < 3) return "text-red-600 bg-red-600/10"
-    if (median < 4) return "text-yellow-600 bg-yellow-600/10"
-    return "text-green-600 bg-green-600/10"
-  }
 
   if (loading) {
     return <div className="min-h-screen bg-background p-6 text-white text-center">Betöltés...</div>
@@ -80,17 +66,29 @@ export default function ClassList() {
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {classes.length > 0 ? (
             classes.map((cls) => (
-              <Card key={cls.id} className="border border-[#262626] bg-[#0a0a0a] shadow-none rounded-xl overflow-hidden hover:border-gray-500 transition-colors">
-                <CardContent className="p-5 flex flex-col justify-between h-full space-y-6">
+              <Card
+                key={cls.id}
+                className="group relative border border-[#262626] bg-gradient-to-b from-[#111111] to-[#0a0a0a] shadow-lg rounded-2xl overflow-hidden hover:border-orange-500/50 hover:shadow-orange-500/10 transition-all duration-300"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/5 to-orange-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <CardContent className="p-6 flex flex-col justify-between h-full space-y-6 relative z-10">
                   <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-semibold text-white">{cls.name}</h3>
-                    <div className={`px-2.5 py-0.5 rounded-md text-sm font-bold ${getMedianStyles(cls.median)}`}>
-                      {cls.median ? cls.median.toFixed(2) : "N/A"}
+                    <div className="space-y-1">
+                      <h3 className="text-xl font-bold text-white tracking-tight group-hover:text-orange-400 transition-colors">{cls.name}</h3>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider font-medium">Osztály</p>
                     </div>
+                    {cls.median !== undefined && (
+                      <div className={`px-3 py-1 rounded-full text-xs font-bold ring-1 ring-inset ${cls.median < 3 ? "text-red-400 bg-red-400/10 ring-red-400/20" :
+                        cls.median < 4 ? "text-yellow-400 bg-yellow-400/10 ring-yellow-400/20" :
+                          "text-green-400 bg-green-400/10 ring-green-400/20"
+                        }`}>
+                        Átlag: {cls.median.toFixed(2)}
+                      </div>
+                    )}
                   </div>
                   <Button
                     variant="secondary"
-                    className="bg-orange text-black hover:bg-gray-200"
+                    className="w-full bg-white/5 hover:bg-orange-500 hover:text-white text-gray-300 border border-white/10 transition-all duration-300 rounded-xl"
                     onClick={() => router.push(`/dashboard/classes/${cls.id}`)}
                   >
                     Megnyitás
@@ -99,8 +97,9 @@ export default function ClassList() {
               </Card>
             ))
           ) : (
-            <div className="col-span-full text-center py-12 text-gray-500 italic">
-              Még nem hoztál létre osztályt.
+            <div className="col-span-full flex flex-col items-center justify-center p-12 border-2 border-dashed border-[#262626] rounded-2xl bg-[#0a0a0a]/50">
+              <div className="text-gray-500 text-lg mb-2 font-medium">Nincs még osztályod</div>
+              <p className="text-gray-600 text-sm">Hozz létre egyet az alábbi gombbal kezdésként.</p>
             </div>
           )}
         </div>
