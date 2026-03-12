@@ -43,7 +43,7 @@ export default function CreateClass() {
       router.refresh();
     } catch (error: any) {
       console.error(
-        "If this still fails in 'Insecure Chrome', the cookie is likely expired:",
+        "kurva anyád",
         error,
       );
       alert(error);

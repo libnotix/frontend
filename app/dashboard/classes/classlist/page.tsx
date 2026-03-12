@@ -9,7 +9,6 @@ import Link from "next/link"
 
 import { getServerApi } from "@/lib/api"
 
-// Define the shape of your Class object
 type Class = {
   id: number | string
   name: string
@@ -24,10 +23,27 @@ export default function ClassList() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
 
-  const { reset, watch } = useForm<FormValues>({
+  const { reset, watch, setValue } = useForm<FormValues>({
     defaultValues: { classes: [] }
   })
 
+  const handleDelete = async (id: string | number) => {
+    if (!confirm("Tavesz Baxtalo")) return
+
+    try {
+      const api = await getServerApi();
+
+      await api.classesIdDelete({ id: Number(id) });
+
+      const updatedClasses = classes.filter((cls) => cls.id !== id);
+      setValue("classes", updatedClasses);
+
+      alert("Osztály sikeresen törölve.");
+    } catch (error) {
+      console.error("Hiba a törlés során:", error);
+      alert("Hiba történt a törlés közben. Ellenőrizd a jogosultságokat!");
+    }
+  };
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -56,6 +72,7 @@ export default function ClassList() {
     return <div className="min-h-screen bg-background p-6 text-white text-center">Betöltés...</div>
   }
 
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="mx-auto max-w-7xl space-y-6">
@@ -70,6 +87,14 @@ export default function ClassList() {
                 key={cls.id}
                 className="group relative border border-[#262626] bg-gradient-to-b from-[#111111] to-[#0a0a0a] shadow-lg rounded-2xl overflow-hidden hover:border-orange-500/50 hover:shadow-orange-500/10 transition-all duration-300"
               >
+                <Button
+                  variant="destructive"
+                  className="max-w-[100px] absolute right-0.5 mr-2 z-20 bg-white/5 hover:bg-red-500 hover:text-white text-gray-300 border border-white/10 transition-all duration-300" onClick={() => {
+                    handleDelete(cls.id)
+                  }}
+                >
+                  Törlés
+                </Button>
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/5 to-orange-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <CardContent className="p-6 flex flex-col justify-between h-full space-y-6 relative z-10">
                   <div className="flex justify-between items-start">

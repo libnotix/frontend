@@ -23,7 +23,7 @@ export default async function DashboardLayout({
                 {children}
             </AuthProvider>
 
-            <Link href="dashboard/classes/classcreate" className="w-100 h-100 border-1px-solid">gonb</Link>
+            <Link href="dashboard/classes/classlist" className="w-100 h-100 border-1px-solid">gonb</Link>
         </div>
     );
 }
