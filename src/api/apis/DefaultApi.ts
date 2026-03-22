@@ -15,22 +15,43 @@
 
 import * as runtime from '../runtime';
 import type {
+  AiQueryPost200Response,
   AuthLoginEndPost200Response,
   AuthLoginStartPost200Response,
   AuthRegisterPost400Response,
   AuthSessionGet200Response,
   ClassesGet200Response,
+  ClassesIdMembersGet200Response,
+  ClassesIdMembersPost201Response,
+  ClassesIdMembersPostRequest,
+  ClassesIdStudentsGet200Response,
+  ClassesIdStudentsPost201Response,
   ClassesPost201Response,
   CreateClassRequest,
+  CreateDraftRequest,
+  CreateStudentRequest,
+  CreateSubjectRequest,
+  DraftChatRequest,
+  DraftChatsIdPost200Response,
+  DraftLinkIdGet200Response,
+  DraftLinkIdPostRequest,
+  DraftsIdGet200Response,
+  FreeQueryRequest,
   LoginEndRequest,
   LoginStartRequest,
   ModelApiResponse,
   RefreshRequest,
   RegisterRequest,
+  SubjectsGet200Response,
+  SubjectsPost201Response,
   UpdateClassRequest,
+  UpdateDraftRequest,
+  UpdateStudentRequest,
   ValidationErrorResponse,
 } from '../models/index';
 import {
+    AiQueryPost200ResponseFromJSON,
+    AiQueryPost200ResponseToJSON,
     AuthLoginEndPost200ResponseFromJSON,
     AuthLoginEndPost200ResponseToJSON,
     AuthLoginStartPost200ResponseFromJSON,
@@ -41,10 +62,38 @@ import {
     AuthSessionGet200ResponseToJSON,
     ClassesGet200ResponseFromJSON,
     ClassesGet200ResponseToJSON,
+    ClassesIdMembersGet200ResponseFromJSON,
+    ClassesIdMembersGet200ResponseToJSON,
+    ClassesIdMembersPost201ResponseFromJSON,
+    ClassesIdMembersPost201ResponseToJSON,
+    ClassesIdMembersPostRequestFromJSON,
+    ClassesIdMembersPostRequestToJSON,
+    ClassesIdStudentsGet200ResponseFromJSON,
+    ClassesIdStudentsGet200ResponseToJSON,
+    ClassesIdStudentsPost201ResponseFromJSON,
+    ClassesIdStudentsPost201ResponseToJSON,
     ClassesPost201ResponseFromJSON,
     ClassesPost201ResponseToJSON,
     CreateClassRequestFromJSON,
     CreateClassRequestToJSON,
+    CreateDraftRequestFromJSON,
+    CreateDraftRequestToJSON,
+    CreateStudentRequestFromJSON,
+    CreateStudentRequestToJSON,
+    CreateSubjectRequestFromJSON,
+    CreateSubjectRequestToJSON,
+    DraftChatRequestFromJSON,
+    DraftChatRequestToJSON,
+    DraftChatsIdPost200ResponseFromJSON,
+    DraftChatsIdPost200ResponseToJSON,
+    DraftLinkIdGet200ResponseFromJSON,
+    DraftLinkIdGet200ResponseToJSON,
+    DraftLinkIdPostRequestFromJSON,
+    DraftLinkIdPostRequestToJSON,
+    DraftsIdGet200ResponseFromJSON,
+    DraftsIdGet200ResponseToJSON,
+    FreeQueryRequestFromJSON,
+    FreeQueryRequestToJSON,
     LoginEndRequestFromJSON,
     LoginEndRequestToJSON,
     LoginStartRequestFromJSON,
@@ -55,11 +104,23 @@ import {
     RefreshRequestToJSON,
     RegisterRequestFromJSON,
     RegisterRequestToJSON,
+    SubjectsGet200ResponseFromJSON,
+    SubjectsGet200ResponseToJSON,
+    SubjectsPost201ResponseFromJSON,
+    SubjectsPost201ResponseToJSON,
     UpdateClassRequestFromJSON,
     UpdateClassRequestToJSON,
+    UpdateDraftRequestFromJSON,
+    UpdateDraftRequestToJSON,
+    UpdateStudentRequestFromJSON,
+    UpdateStudentRequestToJSON,
     ValidationErrorResponseFromJSON,
     ValidationErrorResponseToJSON,
 } from '../models/index';
+
+export interface AiQueryPostRequest {
+    freeQueryRequest: FreeQueryRequest;
+}
 
 export interface AuthLoginEndPostRequest {
     loginEndRequest: LoginEndRequest;
@@ -85,19 +146,149 @@ export interface ClassesIdGetRequest {
     id: number;
 }
 
+export interface ClassesIdMembersGetRequest {
+    id: number;
+}
+
+export interface ClassesIdMembersPostOperationRequest {
+    id: number;
+    classesIdMembersPostRequest: ClassesIdMembersPostRequest;
+}
+
+export interface ClassesIdMembersUserIdDeleteRequest {
+    id: number;
+    userId: number;
+}
+
 export interface ClassesIdPutRequest {
     id: number;
     updateClassRequest: UpdateClassRequest;
+}
+
+export interface ClassesIdStudentsGetRequest {
+    id: number;
+}
+
+export interface ClassesIdStudentsPostRequest {
+    id: number;
+    createStudentRequest: CreateStudentRequest;
+}
+
+export interface ClassesIdStudentsStudentIdDeleteRequest {
+    id: number;
+    studentId: number;
 }
 
 export interface ClassesPostRequest {
     createClassRequest: CreateClassRequest;
 }
 
+export interface DraftChatsIdGetRequest {
+    id: number;
+}
+
+export interface DraftChatsIdPostRequest {
+    id: number;
+    draftChatRequest: DraftChatRequest;
+    responseMode?: DraftChatsIdPostResponseModeEnum;
+    xDraftChatResponseMode?: DraftChatsIdPostXDraftChatResponseModeEnum;
+    idempotencyKey?: string;
+    xRequestId?: string;
+}
+
+export interface DraftLinkIdDeleteRequest {
+    id: number;
+    draftLinkIdPostRequest: DraftLinkIdPostRequest;
+}
+
+export interface DraftLinkIdGetRequest {
+    id: number;
+}
+
+export interface DraftLinkIdPostOperationRequest {
+    id: number;
+    draftLinkIdPostRequest: DraftLinkIdPostRequest;
+}
+
+export interface DraftsIdDeleteRequest {
+    id: number;
+}
+
+export interface DraftsIdGetRequest {
+    id: number;
+}
+
+export interface DraftsIdPutRequest {
+    id: number;
+    updateDraftRequest: UpdateDraftRequest;
+}
+
+export interface DraftsPostRequest {
+    createDraftRequest: CreateDraftRequest;
+}
+
+export interface FilesDownloadIdGetRequest {
+    id: number;
+}
+
+export interface FilesUploadPostRequest {
+    file?: Blob;
+}
+
+export interface StudentsIdPutRequest {
+    id: number;
+    updateStudentRequest?: UpdateStudentRequest;
+}
+
+export interface SubjectsPostRequest {
+    createSubjectRequest: CreateSubjectRequest;
+}
+
 /**
  * 
  */
 export class DefaultApi extends runtime.BaseAPI {
+
+    /**
+     * Sends a free-form prompt to the Gemini model and returns the generated text response.
+     * Free Gemini AI query
+     */
+    async aiQueryPostRaw(requestParameters: AiQueryPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AiQueryPost200Response>> {
+        if (requestParameters['freeQueryRequest'] == null) {
+            throw new runtime.RequiredError(
+                'freeQueryRequest',
+                'Required parameter "freeQueryRequest" was null or undefined when calling aiQueryPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/ai/query`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: FreeQueryRequestToJSON(requestParameters['freeQueryRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => AiQueryPost200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Sends a free-form prompt to the Gemini model and returns the generated text response.
+     * Free Gemini AI query
+     */
+    async aiQueryPost(requestParameters: AiQueryPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AiQueryPost200Response> {
+        const response = await this.aiQueryPostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      * Complete login process (verify OTP)
@@ -426,7 +617,166 @@ export class DefaultApi extends runtime.BaseAPI {
     }
 
     /**
-     * Updates a school class name. Teachers may only update classes they created. Admins may update any class. 
+     * Returns users who are members of this class. Class member or admin.
+     * List class members (teachers)
+     */
+    async classesIdMembersGetRaw(requestParameters: ClassesIdMembersGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClassesIdMembersGet200Response>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling classesIdMembersGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/classes/{id}/members`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ClassesIdMembersGet200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns users who are members of this class. Class member or admin.
+     * List class members (teachers)
+     */
+    async classesIdMembersGet(requestParameters: ClassesIdMembersGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClassesIdMembersGet200Response> {
+        const response = await this.classesIdMembersGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Adds a user as class member. Class member or admin.
+     * Add a teacher to a class
+     */
+    async classesIdMembersPostRaw(requestParameters: ClassesIdMembersPostOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClassesIdMembersPost201Response>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling classesIdMembersPost().'
+            );
+        }
+
+        if (requestParameters['classesIdMembersPostRequest'] == null) {
+            throw new runtime.RequiredError(
+                'classesIdMembersPostRequest',
+                'Required parameter "classesIdMembersPostRequest" was null or undefined when calling classesIdMembersPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/classes/{id}/members`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ClassesIdMembersPostRequestToJSON(requestParameters['classesIdMembersPostRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ClassesIdMembersPost201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Adds a user as class member. Class member or admin.
+     * Add a teacher to a class
+     */
+    async classesIdMembersPost(requestParameters: ClassesIdMembersPostOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClassesIdMembersPost201Response> {
+        const response = await this.classesIdMembersPostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Removes user from class members. Class member or admin.
+     * Remove a teacher from a class
+     */
+    async classesIdMembersUserIdDeleteRaw(requestParameters: ClassesIdMembersUserIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ModelApiResponse>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling classesIdMembersUserIdDelete().'
+            );
+        }
+
+        if (requestParameters['userId'] == null) {
+            throw new runtime.RequiredError(
+                'userId',
+                'Required parameter "userId" was null or undefined when calling classesIdMembersUserIdDelete().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/classes/{id}/members/{userId}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+        urlPath = urlPath.replace(`{${"userId"}}`, encodeURIComponent(String(requestParameters['userId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ModelApiResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Removes user from class members. Class member or admin.
+     * Remove a teacher from a class
+     */
+    async classesIdMembersUserIdDelete(requestParameters: ClassesIdMembersUserIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ModelApiResponse> {
+        const response = await this.classesIdMembersUserIdDeleteRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Updates a school class. User must be a class member or admin. 
      * Update a school class
      */
     async classesIdPutRaw(requestParameters: ClassesIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClassesPost201Response>> {
@@ -474,7 +824,7 @@ export class DefaultApi extends runtime.BaseAPI {
     }
 
     /**
-     * Updates a school class name. Teachers may only update classes they created. Admins may update any class. 
+     * Updates a school class. User must be a class member or admin. 
      * Update a school class
      */
     async classesIdPut(requestParameters: ClassesIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClassesPost201Response> {
@@ -483,7 +833,166 @@ export class DefaultApi extends runtime.BaseAPI {
     }
 
     /**
-     * Creates a new school class. Accessible by teachers and admins.
+     * Returns students enrolled in this class. Class member or admin.
+     * List students in a class
+     */
+    async classesIdStudentsGetRaw(requestParameters: ClassesIdStudentsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClassesIdStudentsGet200Response>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling classesIdStudentsGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/classes/{id}/students`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ClassesIdStudentsGet200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns students enrolled in this class. Class member or admin.
+     * List students in a class
+     */
+    async classesIdStudentsGet(requestParameters: ClassesIdStudentsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClassesIdStudentsGet200Response> {
+        const response = await this.classesIdStudentsGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates a new student and enrolls them in the class. Class member or admin.
+     * Add a student to a class
+     */
+    async classesIdStudentsPostRaw(requestParameters: ClassesIdStudentsPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClassesIdStudentsPost201Response>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling classesIdStudentsPost().'
+            );
+        }
+
+        if (requestParameters['createStudentRequest'] == null) {
+            throw new runtime.RequiredError(
+                'createStudentRequest',
+                'Required parameter "createStudentRequest" was null or undefined when calling classesIdStudentsPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/classes/{id}/students`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CreateStudentRequestToJSON(requestParameters['createStudentRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ClassesIdStudentsPost201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Creates a new student and enrolls them in the class. Class member or admin.
+     * Add a student to a class
+     */
+    async classesIdStudentsPost(requestParameters: ClassesIdStudentsPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClassesIdStudentsPost201Response> {
+        const response = await this.classesIdStudentsPostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Removes enrollment only; student record remains. Class member or admin.
+     * Remove a student from a class
+     */
+    async classesIdStudentsStudentIdDeleteRaw(requestParameters: ClassesIdStudentsStudentIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ModelApiResponse>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling classesIdStudentsStudentIdDelete().'
+            );
+        }
+
+        if (requestParameters['studentId'] == null) {
+            throw new runtime.RequiredError(
+                'studentId',
+                'Required parameter "studentId" was null or undefined when calling classesIdStudentsStudentIdDelete().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/classes/{id}/students/{studentId}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+        urlPath = urlPath.replace(`{${"studentId"}}`, encodeURIComponent(String(requestParameters['studentId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ModelApiResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Removes enrollment only; student record remains. Class member or admin.
+     * Remove a student from a class
+     */
+    async classesIdStudentsStudentIdDelete(requestParameters: ClassesIdStudentsStudentIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ModelApiResponse> {
+        const response = await this.classesIdStudentsStudentIdDeleteRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates a new school class. Any teacher or admin. Creator is added as class member.
      * Create a school class
      */
     async classesPostRaw(requestParameters: ClassesPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClassesPost201Response>> {
@@ -523,12 +1032,642 @@ export class DefaultApi extends runtime.BaseAPI {
     }
 
     /**
-     * Creates a new school class. Accessible by teachers and admins.
+     * Creates a new school class. Any teacher or admin. Creator is added as class member.
      * Create a school class
      */
     async classesPost(requestParameters: ClassesPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClassesPost201Response> {
         const response = await this.classesPostRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     * Get chat history for draft
+     */
+    async draftChatsIdGetRaw(requestParameters: DraftChatsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling draftChatsIdGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/draft-chats/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Get chat history for draft
+     */
+    async draftChatsIdGet(requestParameters: DraftChatsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.draftChatsIdGetRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Send a message to the AI draft editor
+     */
+    async draftChatsIdPostRaw(requestParameters: DraftChatsIdPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DraftChatsIdPost200Response>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling draftChatsIdPost().'
+            );
+        }
+
+        if (requestParameters['draftChatRequest'] == null) {
+            throw new runtime.RequiredError(
+                'draftChatRequest',
+                'Required parameter "draftChatRequest" was null or undefined when calling draftChatsIdPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['responseMode'] != null) {
+            queryParameters['responseMode'] = requestParameters['responseMode'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (requestParameters['xDraftChatResponseMode'] != null) {
+            headerParameters['x-draft-chat-response-mode'] = String(requestParameters['xDraftChatResponseMode']);
+        }
+
+        if (requestParameters['idempotencyKey'] != null) {
+            headerParameters['idempotency-key'] = String(requestParameters['idempotencyKey']);
+        }
+
+        if (requestParameters['xRequestId'] != null) {
+            headerParameters['x-request-id'] = String(requestParameters['xRequestId']);
+        }
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/draft-chats/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: DraftChatRequestToJSON(requestParameters['draftChatRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => DraftChatsIdPost200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Send a message to the AI draft editor
+     */
+    async draftChatsIdPost(requestParameters: DraftChatsIdPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DraftChatsIdPost200Response> {
+        const response = await this.draftChatsIdPostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Unlink a file from a draft
+     */
+    async draftLinkIdDeleteRaw(requestParameters: DraftLinkIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling draftLinkIdDelete().'
+            );
+        }
+
+        if (requestParameters['draftLinkIdPostRequest'] == null) {
+            throw new runtime.RequiredError(
+                'draftLinkIdPostRequest',
+                'Required parameter "draftLinkIdPostRequest" was null or undefined when calling draftLinkIdDelete().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/draft-link/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+            body: DraftLinkIdPostRequestToJSON(requestParameters['draftLinkIdPostRequest']),
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Unlink a file from a draft
+     */
+    async draftLinkIdDelete(requestParameters: DraftLinkIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.draftLinkIdDeleteRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Get files linked to a draft
+     */
+    async draftLinkIdGetRaw(requestParameters: DraftLinkIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DraftLinkIdGet200Response>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling draftLinkIdGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/draft-link/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => DraftLinkIdGet200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Get files linked to a draft
+     */
+    async draftLinkIdGet(requestParameters: DraftLinkIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DraftLinkIdGet200Response> {
+        const response = await this.draftLinkIdGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Link a file to a draft
+     */
+    async draftLinkIdPostRaw(requestParameters: DraftLinkIdPostOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling draftLinkIdPost().'
+            );
+        }
+
+        if (requestParameters['draftLinkIdPostRequest'] == null) {
+            throw new runtime.RequiredError(
+                'draftLinkIdPostRequest',
+                'Required parameter "draftLinkIdPostRequest" was null or undefined when calling draftLinkIdPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/draft-link/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: DraftLinkIdPostRequestToJSON(requestParameters['draftLinkIdPostRequest']),
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Link a file to a draft
+     */
+    async draftLinkIdPost(requestParameters: DraftLinkIdPostOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.draftLinkIdPostRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * List all drafts for user
+     */
+    async draftsGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/drafts`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * List all drafts for user
+     */
+    async draftsGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.draftsGetRaw(initOverrides);
+    }
+
+    /**
+     * Delete a draft
+     */
+    async draftsIdDeleteRaw(requestParameters: DraftsIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling draftsIdDelete().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/drafts/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Delete a draft
+     */
+    async draftsIdDelete(requestParameters: DraftsIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.draftsIdDeleteRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Get a specific draft
+     */
+    async draftsIdGetRaw(requestParameters: DraftsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DraftsIdGet200Response>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling draftsIdGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/drafts/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => DraftsIdGet200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Get a specific draft
+     */
+    async draftsIdGet(requestParameters: DraftsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DraftsIdGet200Response> {
+        const response = await this.draftsIdGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Update a draft
+     */
+    async draftsIdPutRaw(requestParameters: DraftsIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling draftsIdPut().'
+            );
+        }
+
+        if (requestParameters['updateDraftRequest'] == null) {
+            throw new runtime.RequiredError(
+                'updateDraftRequest',
+                'Required parameter "updateDraftRequest" was null or undefined when calling draftsIdPut().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/drafts/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UpdateDraftRequestToJSON(requestParameters['updateDraftRequest']),
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Update a draft
+     */
+    async draftsIdPut(requestParameters: DraftsIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.draftsIdPutRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Create a draft
+     */
+    async draftsPostRaw(requestParameters: DraftsPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['createDraftRequest'] == null) {
+            throw new runtime.RequiredError(
+                'createDraftRequest',
+                'Required parameter "createDraftRequest" was null or undefined when calling draftsPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/drafts`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CreateDraftRequestToJSON(requestParameters['createDraftRequest']),
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Create a draft
+     */
+    async draftsPost(requestParameters: DraftsPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.draftsPostRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Download a file
+     */
+    async filesDownloadIdGetRaw(requestParameters: FilesDownloadIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling filesDownloadIdGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/files/download/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Download a file
+     */
+    async filesDownloadIdGet(requestParameters: FilesDownloadIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.filesDownloadIdGetRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * List all files for user
+     */
+    async filesGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/files`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * List all files for user
+     */
+    async filesGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.filesGetRaw(initOverrides);
+    }
+
+    /**
+     * Upload a file
+     */
+    async filesUploadPostRaw(requestParameters: FilesUploadPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const consumes: runtime.Consume[] = [
+            { contentType: 'multipart/form-data' },
+        ];
+        // @ts-ignore: canConsumeForm may be unused
+        const canConsumeForm = runtime.canConsumeForm(consumes);
+
+        let formParams: { append(param: string, value: any): any };
+        let useForm = false;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        useForm = canConsumeForm;
+        if (useForm) {
+            formParams = new FormData();
+        } else {
+            formParams = new URLSearchParams();
+        }
+
+        if (requestParameters['file'] != null) {
+            formParams.append('file', requestParameters['file'] as any);
+        }
+
+
+        let urlPath = `/files/upload`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: formParams,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Upload a file
+     */
+    async filesUploadPost(requestParameters: FilesUploadPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.filesUploadPostRaw(requestParameters, initOverrides);
     }
 
     /**
@@ -565,6 +1704,45 @@ export class DefaultApi extends runtime.BaseAPI {
     }
 
     /**
+     * For current user linked as a student; returns all classes they are enrolled in.
+     * Get my classes (student)
+     */
+    async meClassesGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClassesGet200Response>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/me/classes`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ClassesGet200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * For current user linked as a student; returns all classes they are enrolled in.
+     * Get my classes (student)
+     */
+    async meClassesGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClassesGet200Response> {
+        const response = await this.meClassesGetRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
      * Home page
      */
     async rootGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
@@ -597,4 +1775,161 @@ export class DefaultApi extends runtime.BaseAPI {
         return await response.value();
     }
 
+    /**
+     * Update firstName, lastName, email. Class member of any class the student is in, or admin.
+     * Update a student (rename)
+     */
+    async studentsIdPutRaw(requestParameters: StudentsIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClassesIdStudentsPost201Response>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling studentsIdPut().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/students/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UpdateStudentRequestToJSON(requestParameters['updateStudentRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ClassesIdStudentsPost201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Update firstName, lastName, email. Class member of any class the student is in, or admin.
+     * Update a student (rename)
+     */
+    async studentsIdPut(requestParameters: StudentsIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClassesIdStudentsPost201Response> {
+        const response = await this.studentsIdPutRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Returns all subjects for filtering and class tagging. Any authenticated user.
+     * List all subjects
+     */
+    async subjectsGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SubjectsGet200Response>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/subjects`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => SubjectsGet200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns all subjects for filtering and class tagging. Any authenticated user.
+     * List all subjects
+     */
+    async subjectsGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SubjectsGet200Response> {
+        const response = await this.subjectsGetRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates a new subject (admin only). For filtering and data mining.
+     * Create a subject
+     */
+    async subjectsPostRaw(requestParameters: SubjectsPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SubjectsPost201Response>> {
+        if (requestParameters['createSubjectRequest'] == null) {
+            throw new runtime.RequiredError(
+                'createSubjectRequest',
+                'Required parameter "createSubjectRequest" was null or undefined when calling subjectsPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/subjects`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CreateSubjectRequestToJSON(requestParameters['createSubjectRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => SubjectsPost201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Creates a new subject (admin only). For filtering and data mining.
+     * Create a subject
+     */
+    async subjectsPost(requestParameters: SubjectsPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SubjectsPost201Response> {
+        const response = await this.subjectsPostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
 }
+
+/**
+ * @export
+ */
+export const DraftChatsIdPostResponseModeEnum = {
+    Legacy: 'legacy',
+    Grouped: 'grouped',
+    Dual: 'dual'
+} as const;
+export type DraftChatsIdPostResponseModeEnum = typeof DraftChatsIdPostResponseModeEnum[keyof typeof DraftChatsIdPostResponseModeEnum];
+/**
+ * @export
+ */
+export const DraftChatsIdPostXDraftChatResponseModeEnum = {
+    Legacy: 'legacy',
+    Grouped: 'grouped',
+    Dual: 'dual'
+} as const;
+export type DraftChatsIdPostXDraftChatResponseModeEnum = typeof DraftChatsIdPostXDraftChatResponseModeEnum[keyof typeof DraftChatsIdPostXDraftChatResponseModeEnum];

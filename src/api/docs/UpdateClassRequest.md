@@ -7,6 +7,10 @@
 Name | Type
 ------------ | -------------
 `name` | string
+`classNumber` | number
+`subjectId` | number
+`icon` | string
+`color` | string
 
 ## Example
 
@@ -16,6 +20,10 @@ import type { UpdateClassRequest } from ''
 // TODO: Update the object below with actual values
 const example = {
   "name": null,
+  "classNumber": null,
+  "subjectId": null,
+  "icon": null,
+  "color": null,
 } satisfies UpdateClassRequest
 
 console.log(example)

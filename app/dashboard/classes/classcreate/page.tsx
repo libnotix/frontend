@@ -9,7 +9,7 @@ import z from "zod";
 
 const formSchema = z.object({
   className: z.string().min(1, "Kötelező mező"),
-  description: z.string().optional(),
+  classNumber: z.number().min(1, "Kötelező mező"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -24,7 +24,7 @@ export default function CreateClass() {
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { className: "", description: "" },
+    defaultValues: { className: "", classNumber: "" as any },
   });
 
   const onSubmit = async (values: FormValues) => {
@@ -35,10 +35,10 @@ export default function CreateClass() {
       await api.classesPost({
         createClassRequest: {
           name: values.className,
+          classNumber: values.classNumber,
         },
       });
 
-      console.log("Success! The bypass worked.");
       router.push("/dashboard/classes/classlist");
       router.refresh();
     } catch (error: any) {
@@ -73,6 +73,21 @@ export default function CreateClass() {
               {errors.className && (
                 <p className="text-red-500 text-[10px]">
                   {errors.className.message}
+                </p>
+              )}
+              <label className="text-[11px] text-gray-400 uppercase">
+                Évfolyam
+              </label>
+              <input
+                type="number"
+                {...register("classNumber", { valueAsNumber: true })}
+                className="w-full bg-[#111] border  border-[#262626] p-3 text-sm focus:border-orange outline-none"
+                placeholder="Pl. 10"
+                disabled={isLoading}
+              />
+              {errors.classNumber && (
+                <p className="text-red-500 text-[10px]">
+                  {errors.classNumber.message}
                 </p>
               )}
             </div>

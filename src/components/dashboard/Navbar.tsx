@@ -14,6 +14,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Logout04Icon } from "@hugeicons/core-free-icons";
 import { logout } from "@/actions/auth";
+import Link from "next/link";
 
 const DashboardNavbar = ({
     user,
@@ -23,7 +24,7 @@ const DashboardNavbar = ({
     return (
         <div className="w-full sticky top-0 left-0 flex justify-center bg-accent">
             <nav className="h-16 flex items-center justify-between container">
-                <h1 className="text-xl font-bold">TanárSegéd</h1>
+                <h1 className="text-xl font-bold cursor-pointer hover:opacity-80 transition-opacity"><Link href="/dashboard">TanárSegéd</Link></h1>
 
                 <DropdownMenu>
                     <DropdownMenuTrigger className="outline-none">

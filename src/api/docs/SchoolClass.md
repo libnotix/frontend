@@ -8,6 +8,10 @@ Name | Type
 ------------ | -------------
 `id` | number
 `name` | string
+`classNumber` | number
+`subjectId` | number
+`icon` | string
+`color` | string
 `createdBy` | number
 `createdAt` | Date
 `updatedAt` | Date
@@ -21,6 +25,10 @@ import type { SchoolClass } from ''
 const example = {
   "id": null,
   "name": null,
+  "classNumber": null,
+  "subjectId": null,
+  "icon": null,
+  "color": null,
   "createdBy": null,
   "createdAt": null,
   "updatedAt": null,

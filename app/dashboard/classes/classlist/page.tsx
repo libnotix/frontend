@@ -9,14 +9,10 @@ import Link from "next/link"
 
 import { getServerApi } from "@/lib/api"
 
-type Class = {
-  id: number | string
-  name: string
-  median?: number
-}
+import type { SchoolClass } from "@/api"
 
 type FormValues = {
-  classes: Class[]
+  classes: SchoolClass[]
 }
 
 export default function ClassList() {
@@ -27,13 +23,13 @@ export default function ClassList() {
     defaultValues: { classes: [] }
   })
 
-  const handleDelete = async (id: string | number) => {
-    if (!confirm("Tavesz Baxtalo")) return
+  const handleDelete = async (id?: number) => {
+    if (!id || !confirm("Tavesz Baxtalo")) return
 
     try {
       const api = await getServerApi();
 
-      await api.classesIdDelete({ id: Number(id) });
+      await api.classesIdDelete({ id });
 
       const updatedClasses = classes.filter((cls) => cls.id !== id);
       setValue("classes", updatedClasses);
@@ -51,7 +47,6 @@ export default function ClassList() {
         const response = await api.classesGet()
 
         const classesArray = response.classes || []
-        // @ts-ignore - map to local shape
         reset({ classes: classesArray })
       } catch (error: any) {
         console.error("Failed to fetch classes:", error)
@@ -100,16 +95,8 @@ export default function ClassList() {
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
                       <h3 className="text-xl font-bold text-white tracking-tight group-hover:text-orange-400 transition-colors">{cls.name}</h3>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider font-medium">Osztály</p>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider font-medium">Osztály {cls.classNumber ? `(${cls.classNumber}. évf.)` : ''}</p>
                     </div>
-                    {cls.median !== undefined && (
-                      <div className={`px-3 py-1 rounded-full text-xs font-bold ring-1 ring-inset ${cls.median < 3 ? "text-red-400 bg-red-400/10 ring-red-400/20" :
-                        cls.median < 4 ? "text-yellow-400 bg-yellow-400/10 ring-yellow-400/20" :
-                          "text-green-400 bg-green-400/10 ring-green-400/20"
-                        }`}>
-                        Átlag: {cls.median.toFixed(2)}
-                      </div>
-                    )}
                   </div>
                   <Button
                     variant="secondary"
@@ -122,7 +109,7 @@ export default function ClassList() {
               </Card>
             ))
           ) : (
-            <div className="col-span-full flex flex-col items-center justify-center p-12 border-2 border-dashed border-[#262626] rounded-2xl bg-[#0a0a0a]/50">
+            <div className="col-span-full flex flex-col items-center justify-center p-12 border-2  border-orange-400 rounded-2xl bg-[#0a0a0a]/50">
               <div className="text-gray-500 text-lg mb-2 font-medium">Nincs még osztályod</div>
               <p className="text-gray-600 text-sm">Hozz létre egyet az alábbi gombbal kezdésként.</p>
             </div>
@@ -130,7 +117,7 @@ export default function ClassList() {
         </div>
 
         <Link href="/dashboard/classes/classcreate">
-          <Card className="mt-6 cursor-pointer border-dashed border-2 border-[#262626] bg-transparent flex items-center justify-center py-8 hover:bg-white/5 hover:border-white transition-all">
+          <Card className="mt-6 cursor-pointer  border-2 border-orange-400 bg-transparent flex items-center justify-center py-8 hover:bg-white/5 hover:border-white transition-all">
             <span className="text-sm font-medium text-white">+ Új osztály létrehozása</span>
           </Card>
         </Link>
