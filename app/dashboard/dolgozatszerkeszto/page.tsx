@@ -3,6 +3,7 @@
 import { memo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useDraggable, useDroppable, DragDropProvider } from "@dnd-kit/react";
+import { useSortable } from "@dnd-kit/react/sortable";
 
 export function Draggable({ id, typeId }: { id: string; typeId: string }) {
    const { ref } = useDraggable({
@@ -13,6 +14,22 @@ export function Draggable({ id, typeId }: { id: string; typeId: string }) {
       <button
          ref={ref}
          className="bg-primary text-primary-foreground px-6 py-3 mb-4 w-full h-15 font-semibold cursor-grab active:cursor-grabbing shadow-lg hover:bg-primary/90 transition-colors"
+      >
+         {available_items.find((item) => item.id === typeId)?.text}
+      </button>
+   );
+}
+
+export function SortableItem({ id, typeId, index }: { id: string; typeId: string; index: number }) {
+   const { ref, isDragging } = useSortable({
+      id: id,
+      index: index,
+   });
+
+   return (
+      <button
+         ref={ref}
+         className={`bg-primary text-primary-foreground px-6 py-3 mb-4 w-full h-15 font-semibold cursor-grab active:cursor-grabbing shadow-lg transition-colors ${isDragging ? "opacity-50" : "hover:bg-primary/90"}`}
       >
          {available_items.find((item) => item.id === typeId)?.text}
       </button>
@@ -49,7 +66,7 @@ const DolgozatSzerkeszto = () => {
       <DragDropProvider
          onDragEnd={(event) => {
             if (event.canceled) return;
-            const targetId = event.operation.target?.id;
+            const targetId = event.operation.target?.id as string;
             const sourceId = event.operation.source?.id as string;
             if (targetId && sourceId) {
                if (sourceId.startsWith("palette-") && targetId === "droppable-1") {
@@ -57,6 +74,26 @@ const DolgozatSzerkeszto = () => {
                   setLeftItems((prev) => [...prev, { id: `${typeId}-${Date.now()}`, typeId }]);
                } else if (!sourceId.startsWith("palette-") && targetId === "droppable-2") {
                   setLeftItems((prev) => prev.filter((item) => item.id !== sourceId));
+               } else if (!sourceId.startsWith("palette-") && targetId !== "droppable-1" && !targetId.startsWith("palette-")) {
+                  setLeftItems((prev) => {
+                     const oldIndex = prev.findIndex((i) => i.id === sourceId);
+                     const newIndex = prev.findIndex((i) => i.id === targetId);
+                     if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) return prev;
+
+                     const newItems = [...prev];
+                     const [moved] = newItems.splice(oldIndex, 1);
+                     newItems.splice(newIndex, 0, moved);
+                     return newItems;
+                  });
+               } else if (!sourceId.startsWith("palette-") && targetId === "droppable-1") {
+                  setLeftItems((prev) => {
+                     const oldIndex = prev.findIndex((i) => i.id === sourceId);
+                     if (oldIndex < 0) return prev;
+                     const newItems = [...prev];
+                     const [moved] = newItems.splice(oldIndex, 1);
+                     newItems.push(moved);
+                     return newItems;
+                  });
                }
             }
          }}
@@ -70,8 +107,8 @@ const DolgozatSzerkeszto = () => {
                         <div className="absolute inset-0 flex items-center justify-center p-4 text-muted-foreground text-lg">Húzd ide a feladatot...</div>
                      )}
                      <Droppable id="droppable-1">
-                        {leftItems.map((item) => (
-                           <Draggable key={item.id} id={item.id} typeId={item.typeId} />
+                        {leftItems.map((item, index) => (
+                           <SortableItem key={item.id} id={item.id} typeId={item.typeId} index={index} />
                         ))}
                      </Droppable>
                   </div>
