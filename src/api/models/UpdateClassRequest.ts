@@ -24,14 +24,37 @@ export interface UpdateClassRequest {
      * @type {string}
      * @memberof UpdateClassRequest
      */
-    name: string;
+    name?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateClassRequest
+     */
+    classNumber?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateClassRequest
+     */
+    subjectId?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateClassRequest
+     */
+    icon?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateClassRequest
+     */
+    color?: string | null;
 }
 
 /**
  * Check if a given object implements the UpdateClassRequest interface.
  */
 export function instanceOfUpdateClassRequest(value: object): value is UpdateClassRequest {
-    if (!('name' in value) || value['name'] === undefined) return false;
     return true;
 }
 
@@ -45,7 +68,11 @@ export function UpdateClassRequestFromJSONTyped(json: any, ignoreDiscriminator: 
     }
     return {
         
-        'name': json['name'],
+        'name': json['name'] == null ? undefined : json['name'],
+        'classNumber': json['classNumber'] == null ? undefined : json['classNumber'],
+        'subjectId': json['subjectId'] == null ? undefined : json['subjectId'],
+        'icon': json['icon'] == null ? undefined : json['icon'],
+        'color': json['color'] == null ? undefined : json['color'],
     };
 }
 
@@ -61,6 +88,10 @@ export function UpdateClassRequestToJSONTyped(value?: UpdateClassRequest | null,
     return {
         
         'name': value['name'],
+        'classNumber': value['classNumber'],
+        'subjectId': value['subjectId'],
+        'icon': value['icon'],
+        'color': value['color'],
     };
 }
 

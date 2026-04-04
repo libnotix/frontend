@@ -107,8 +107,8 @@ const LoginPage = () => {
                     className="pl-10"
                     {...registerStart("email")}
                   />
-                  <div className="absolute left-3 top-2.5 text-muted-foreground">
-                    <Mail />
+                  <div className="absolute left-3 top-0 h-full items-center flex text-muted-foreground">
+                    <Mail className="size-5" />
                   </div>
                 </div>
                 {errorsStart.email && (

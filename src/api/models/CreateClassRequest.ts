@@ -25,6 +25,30 @@ export interface CreateClassRequest {
      * @memberof CreateClassRequest
      */
     name: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateClassRequest
+     */
+    classNumber: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateClassRequest
+     */
+    subjectId?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateClassRequest
+     */
+    icon?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateClassRequest
+     */
+    color?: string;
 }
 
 /**
@@ -32,6 +56,7 @@ export interface CreateClassRequest {
  */
 export function instanceOfCreateClassRequest(value: object): value is CreateClassRequest {
     if (!('name' in value) || value['name'] === undefined) return false;
+    if (!('classNumber' in value) || value['classNumber'] === undefined) return false;
     return true;
 }
 
@@ -46,6 +71,10 @@ export function CreateClassRequestFromJSONTyped(json: any, ignoreDiscriminator: 
     return {
         
         'name': json['name'],
+        'classNumber': json['classNumber'],
+        'subjectId': json['subjectId'] == null ? undefined : json['subjectId'],
+        'icon': json['icon'] == null ? undefined : json['icon'],
+        'color': json['color'] == null ? undefined : json['color'],
     };
 }
 
@@ -61,6 +90,10 @@ export function CreateClassRequestToJSONTyped(value?: CreateClassRequest | null,
     return {
         
         'name': value['name'],
+        'classNumber': value['classNumber'],
+        'subjectId': value['subjectId'],
+        'icon': value['icon'],
+        'color': value['color'],
     };
 }
 

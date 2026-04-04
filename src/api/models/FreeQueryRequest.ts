@@ -26,11 +26,17 @@ export interface FreeQueryRequest {
      */
     prompt: string;
     /**
-     * Gemini model to use (defaults to gemini-2.0-flash)
+     * Gemini model to use (defaults to gemini-flash-latest)
      * @type {string}
      * @memberof FreeQueryRequest
      */
     model?: string;
+    /**
+     * System instruction for the AI model (defaults to "You are a helpful assistant.")
+     * @type {string}
+     * @memberof FreeQueryRequest
+     */
+    systemInstruction?: string;
 }
 
 /**
@@ -53,6 +59,7 @@ export function FreeQueryRequestFromJSONTyped(json: any, ignoreDiscriminator: bo
         
         'prompt': json['prompt'],
         'model': json['model'] == null ? undefined : json['model'],
+        'systemInstruction': json['systemInstruction'] == null ? undefined : json['systemInstruction'],
     };
 }
 
@@ -69,6 +76,7 @@ export function FreeQueryRequestToJSONTyped(value?: FreeQueryRequest | null, ign
         
         'prompt': value['prompt'],
         'model': value['model'],
+        'systemInstruction': value['systemInstruction'],
     };
 }
 

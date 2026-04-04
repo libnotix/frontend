@@ -36,6 +36,30 @@ export interface SchoolClass {
      * @type {number}
      * @memberof SchoolClass
      */
+    classNumber?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SchoolClass
+     */
+    subjectId?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof SchoolClass
+     */
+    icon?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof SchoolClass
+     */
+    color?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof SchoolClass
+     */
     createdBy?: number | null;
     /**
      * 
@@ -70,6 +94,10 @@ export function SchoolClassFromJSONTyped(json: any, ignoreDiscriminator: boolean
         
         'id': json['id'] == null ? undefined : json['id'],
         'name': json['name'] == null ? undefined : json['name'],
+        'classNumber': json['classNumber'] == null ? undefined : json['classNumber'],
+        'subjectId': json['subjectId'] == null ? undefined : json['subjectId'],
+        'icon': json['icon'] == null ? undefined : json['icon'],
+        'color': json['color'] == null ? undefined : json['color'],
         'createdBy': json['createdBy'] == null ? undefined : json['createdBy'],
         'createdAt': json['createdAt'] == null ? undefined : (new Date(json['createdAt'])),
         'updatedAt': json['updatedAt'] == null ? undefined : (new Date(json['updatedAt'])),
@@ -89,6 +117,10 @@ export function SchoolClassToJSONTyped(value?: SchoolClass | null, ignoreDiscrim
         
         'id': value['id'],
         'name': value['name'],
+        'classNumber': value['classNumber'],
+        'subjectId': value['subjectId'],
+        'icon': value['icon'],
+        'color': value['color'],
         'createdBy': value['createdBy'],
         'createdAt': value['createdAt'] == null ? value['createdAt'] : value['createdAt'].toISOString(),
         'updatedAt': value['updatedAt'] == null ? value['updatedAt'] : value['updatedAt'].toISOString(),

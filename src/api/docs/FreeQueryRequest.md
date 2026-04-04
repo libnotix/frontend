@@ -8,6 +8,7 @@ Name | Type
 ------------ | -------------
 `prompt` | string
 `model` | string
+`systemInstruction` | string
 
 ## Example
 
@@ -17,7 +18,8 @@ import type { FreeQueryRequest } from ''
 // TODO: Update the object below with actual values
 const example = {
   "prompt": null,
-  "model": gemini-2.0-flash,
+  "model": gemini-flash-latest,
+  "systemInstruction": null,
 } satisfies FreeQueryRequest
 
 console.log(example)
