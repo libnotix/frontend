@@ -13,15 +13,18 @@ import {
   moveToNextTableCellOrAddRow,
   moveToPreviousTableCell,
 } from "./tableUtils";
+import { SlateDocumentEditableProvider } from "@/lib/slateDocumentEditableContext";
 
 export const EditorInner = ({
   draftId,
   onSave,
   scrollClassName,
+  readOnly = false,
 }: {
   draftId?: string;
   onSave?: (value: SlateEditorNode[]) => void;
   scrollClassName?: string;
+  readOnly?: boolean;
 }) => {
   const editor = useSlate();
   const persistentSelection = usePersistentSelection();
@@ -45,17 +48,19 @@ export const EditorInner = ({
   );
 
   return (
-    <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
-      <Toolbar draftId={draftId} />
-      <div className={`flex-1 overflow-y-auto pb-16 sm:pb-24${scrollClassName ? ` ${scrollClassName}` : ""}`}>
-        <div className="mx-auto min-h-[calc(100vh-12rem)] w-full max-w-[860px] py-9 px-8 sm:px-12 md:px-16">
-          <Editable
-            decorate={decorate}
+    <SlateDocumentEditableProvider value={!readOnly}>
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
+        {!readOnly && <Toolbar draftId={draftId} />}
+        <div className={`flex-1 overflow-y-auto pb-16 sm:pb-24${scrollClassName ? ` ${scrollClassName}` : ""}`}>
+          <div className="mx-auto min-h-[calc(100vh-12rem)] w-full max-w-[860px] py-9 px-8 sm:px-12 md:px-16">
+            <Editable
+            readOnly={readOnly}
+            decorate={readOnly ? () => [] : decorate}
             className="vazlat-editable prose max-w-none outline-none dark:prose-invert prose-neutral selection:bg-primary/30 selection:text-foreground"
             renderElement={renderElement}
             renderLeaf={renderLeaf}
             placeholder="Start drafting here..."
-            onPaste={(event) => {
+            onPaste={readOnly ? undefined : (event) => {
               const html = event.clipboardData.getData("text/html");
               if (!html || !html.includes("<img")) return;
               const doc = new DOMParser().parseFromString(html, "text/html");
@@ -70,7 +75,10 @@ export const EditorInner = ({
                 layout: createDefaultImageLayoutV3(),
               });
             }}
-            onKeyDown={(e) => {
+            onKeyDown={
+              readOnly
+                ? undefined
+                : (e) => {
               if (e.key === "Tab") {
                 const handled = e.shiftKey
                   ? moveToPreviousTableCell(editor)
@@ -120,6 +128,11 @@ export const EditorInner = ({
                   }
                 }
               }
+              if (e.key === "`" && !e.metaKey && !e.ctrlKey) {
+                e.preventDefault();
+                toggleMark(editor, "code");
+                return;
+              }
               const mod = e.ctrlKey || e.metaKey;
               if (!mod) return;
               if (e.key === "s") {
@@ -152,8 +165,9 @@ export const EditorInner = ({
               }
             }}
           />
+          </div>
         </div>
       </div>
-    </div>
+    </SlateDocumentEditableProvider>
   );
 };

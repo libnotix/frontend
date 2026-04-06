@@ -37,6 +37,8 @@ import {
   updateImageLayout,
 } from "./tableUtils";
 import { api } from "@/lib/api";
+import { useDraftAssetBlobFetcher } from "@/lib/draftAssetBlobFetcherContext";
+import { useSlateDocumentEditable } from "@/lib/slateDocumentEditableContext";
 
 function ElementWithAIActions({
   attributes,
@@ -49,6 +51,7 @@ function ElementWithAIActions({
   as: "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "li" | "ul" | "ol";
 }) {
   const editor = useSlateStatic();
+  const canEditDocument = useSlateDocumentEditable();
   const path = React.useMemo(() => {
     try {
       return ReactEditor.findPath(editor, element);
@@ -59,13 +62,15 @@ function ElementWithAIActions({
 
   const hasDiffMarks = path ? hasPendingAIDiffMarks(editor, path) : false;
   const diffGroup = path ? getAIDiffGroupForPath(editor, path) : null;
-  const shouldShowActions = hasDiffMarks
-    ? diffGroup
-      ? path
-        ? isAIDiffGroupLeaderPath(editor, path, diffGroup)
+  const shouldShowActions =
+    canEditDocument &&
+    (hasDiffMarks
+      ? diffGroup
+        ? path
+          ? isAIDiffGroupLeaderPath(editor, path, diffGroup)
+          : false
         : false
-      : false
-    : false;
+      : false);
 
   const content = (
     <Component
@@ -118,6 +123,8 @@ function ImageElementWithControls({
   element,
 }: RenderElementProps) {
   const editor = useSlateStatic();
+  const canEditDocument = useSlateDocumentEditable();
+  const assetBlobFetcher = useDraftAssetBlobFetcher();
   const imageElement = element as Record<string, unknown>;
   const [resolvedSrc, setResolvedSrc] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
@@ -170,8 +177,11 @@ function ImageElementWithControls({
       setLoading(true);
       setError(null);
       try {
-        const response = await api.filesDownloadIdGetRaw({ id: assetId });
-        const blob = await response.raw.blob();
+        const blob = assetBlobFetcher
+          ? await assetBlobFetcher(assetId)
+          : await api
+              .filesDownloadIdGetRaw({ id: assetId })
+              .then((r) => r.raw.blob());
         const objectUrl = URL.createObjectURL(blob);
         revoked = objectUrl;
         setResolvedSrc(objectUrl);
@@ -186,7 +196,7 @@ function ImageElementWithControls({
     return () => {
       if (revoked) URL.revokeObjectURL(revoked);
     };
-  }, [assetId, rawSrc]);
+  }, [assetId, rawSrc, assetBlobFetcher]);
 
   const layout = React.useMemo<ImageLayoutV3>(() => {
     return normalizeImageLayoutToV3(imageElement.layout);
@@ -238,7 +248,7 @@ function ImageElementWithControls({
         };
 
   React.useEffect(() => {
-    if (!isResizing) return;
+    if (!canEditDocument || !isResizing) return;
 
     const onPointerMove = (event: PointerEvent) => {
       const drag = dragStateRef.current;
@@ -277,12 +287,12 @@ function ImageElementWithControls({
       window.removeEventListener("pointercancel", endResize);
       window.removeEventListener("blur", endResize);
     };
-  }, [editor, isResizing, previewWidthPercent]);
+  }, [canEditDocument, editor, isResizing, previewWidthPercent]);
 
   const startResize = (edge: "left" | "right", event: React.PointerEvent) => {
     event.preventDefault();
     event.stopPropagation();
-    if (!imagePath) return;
+    if (!canEditDocument || !imagePath) return;
     const containerWidth = frameRef.current?.getBoundingClientRect().width ?? 1;
     dragStateRef.current = {
       edge,
@@ -338,105 +348,109 @@ function ImageElementWithControls({
               {error ?? "Image unavailable"}
             </span>
           )}
-          <button
-            type="button"
-            className="absolute left-0 top-0 z-30 h-full w-4 min-w-[16px] -translate-x-1/2 cursor-ew-resize rounded-sm border-0 bg-transparent hover:bg-primary/25 touch-none"
-            onPointerDown={(event) => startResize("left", event)}
-            onMouseDown={(event) => event.preventDefault()}
-            title="Resize image width"
-            aria-label="Resize image from left edge"
-          />
-          <button
-            type="button"
-            className="absolute right-0 top-0 z-30 h-full w-4 min-w-[16px] translate-x-1/2 cursor-ew-resize rounded-sm border-0 bg-transparent hover:bg-primary/25 touch-none"
-            onPointerDown={(event) => startResize("right", event)}
-            onMouseDown={(event) => event.preventDefault()}
-            title="Resize image width"
-            aria-label="Resize image from right edge"
-          />
-          <span className="pointer-events-none absolute -top-10 right-0 z-30 opacity-0 transition-opacity group-hover/image:opacity-100 group-focus-within/image:opacity-100">
-            <span className="pointer-events-auto inline-flex items-center gap-1 rounded-md border border-border bg-background/95 p-1 shadow-sm backdrop-blur-sm">
-              <span className="px-1 text-[10px] text-muted-foreground">{widthPercent}%</span>
+          {canEditDocument ? (
+            <>
               <button
                 type="button"
-                className={`inline-flex items-center rounded px-1.5 py-0.5 text-[11px] ${
-                  layout.float === "left" ? "bg-muted" : "hover:bg-muted/70"
-                }`}
+                className="absolute left-0 top-0 z-30 h-full w-4 min-w-[16px] -translate-x-1/2 cursor-ew-resize rounded-sm border-0 bg-transparent hover:bg-primary/25 touch-none"
+                onPointerDown={(event) => startResize("left", event)}
                 onMouseDown={(event) => event.preventDefault()}
-                onClick={() => {
-                  if (!imagePath) return;
-                  updateImageLayout(editor, imagePath, { float: "left" });
-                }}
-                title="Float left"
-              >
-                <AlignLeft className="size-3" />
-              </button>
+                title="Resize image width"
+                aria-label="Resize image from left edge"
+              />
               <button
                 type="button"
-                className={`inline-flex items-center rounded px-1.5 py-0.5 text-[11px] ${
-                  layout.float === "right" ? "bg-muted" : "hover:bg-muted/70"
-                }`}
+                className="absolute right-0 top-0 z-30 h-full w-4 min-w-[16px] translate-x-1/2 cursor-ew-resize rounded-sm border-0 bg-transparent hover:bg-primary/25 touch-none"
+                onPointerDown={(event) => startResize("right", event)}
                 onMouseDown={(event) => event.preventDefault()}
-                onClick={() => {
-                  if (!imagePath) return;
-                  updateImageLayout(editor, imagePath, { float: "right" });
-                }}
-                title="Float right"
-              >
-                <AlignRight className="size-3" />
-              </button>
-              <button
-                type="button"
-                className={`inline-flex items-center rounded px-1.5 py-0.5 text-[11px] ${
-                  layout.float === "none" ? "bg-muted" : "hover:bg-muted/70"
-                }`}
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => {
-                  if (!imagePath) return;
-                  updateImageLayout(editor, imagePath, { float: "none" });
-                }}
-                title="Block (no float)"
-              >
-                <AlignCenter className="size-3" />
-              </button>
-              <button
-                type="button"
-                className="inline-flex items-center rounded px-1.5 py-0.5 text-[11px] hover:bg-muted/70"
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => {
-                  try {
-                    const path = ReactEditor.findPath(editor, element);
-                    moveImageBlock(editor, path, "up");
-                  } catch {
-                    /* stale element */
-                  }
-                }}
-                title="Swap with block above"
-              >
-                <ArrowUp className="size-3" />
-              </button>
-              <button
-                type="button"
-                className="inline-flex items-center rounded px-1.5 py-0.5 text-[11px] hover:bg-muted/70"
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => {
-                  try {
-                    const path = ReactEditor.findPath(editor, element);
-                    moveImageBlock(editor, path, "down");
-                  } catch {
-                    /* stale element */
-                  }
-                }}
-                title="Swap with block below"
-              >
-                <ArrowDown className="size-3" />
-              </button>
-            </span>
-          </span>
+                title="Resize image width"
+                aria-label="Resize image from right edge"
+              />
+              <span className="pointer-events-none absolute -top-10 right-0 z-30 opacity-0 transition-opacity group-hover/image:opacity-100 group-focus-within/image:opacity-100">
+                <span className="pointer-events-auto inline-flex items-center gap-1 rounded-md border border-border bg-background/95 p-1 shadow-sm backdrop-blur-sm">
+                  <span className="px-1 text-[10px] text-muted-foreground">{widthPercent}%</span>
+                  <button
+                    type="button"
+                    className={`inline-flex items-center rounded px-1.5 py-0.5 text-[11px] ${
+                      layout.float === "left" ? "bg-muted" : "hover:bg-muted/70"
+                    }`}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => {
+                      if (!imagePath) return;
+                      updateImageLayout(editor, imagePath, { float: "left" });
+                    }}
+                    title="Float left"
+                  >
+                    <AlignLeft className="size-3" />
+                  </button>
+                  <button
+                    type="button"
+                    className={`inline-flex items-center rounded px-1.5 py-0.5 text-[11px] ${
+                      layout.float === "right" ? "bg-muted" : "hover:bg-muted/70"
+                    }`}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => {
+                      if (!imagePath) return;
+                      updateImageLayout(editor, imagePath, { float: "right" });
+                    }}
+                    title="Float right"
+                  >
+                    <AlignRight className="size-3" />
+                  </button>
+                  <button
+                    type="button"
+                    className={`inline-flex items-center rounded px-1.5 py-0.5 text-[11px] ${
+                      layout.float === "none" ? "bg-muted" : "hover:bg-muted/70"
+                    }`}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => {
+                      if (!imagePath) return;
+                      updateImageLayout(editor, imagePath, { float: "none" });
+                    }}
+                    title="Block (no float)"
+                  >
+                    <AlignCenter className="size-3" />
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex items-center rounded px-1.5 py-0.5 text-[11px] hover:bg-muted/70"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => {
+                      try {
+                        const path = ReactEditor.findPath(editor, element);
+                        moveImageBlock(editor, path, "up");
+                      } catch {
+                        /* stale element */
+                      }
+                    }}
+                    title="Swap with block above"
+                  >
+                    <ArrowUp className="size-3" />
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex items-center rounded px-1.5 py-0.5 text-[11px] hover:bg-muted/70"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => {
+                      try {
+                        const path = ReactEditor.findPath(editor, element);
+                        moveImageBlock(editor, path, "down");
+                      } catch {
+                        /* stale element */
+                      }
+                    }}
+                    title="Swap with block below"
+                  >
+                    <ArrowDown className="size-3" />
+                  </button>
+                </span>
+              </span>
+            </>
+          ) : null}
           {caption ? <span className="mt-1 block text-xs text-muted-foreground">{caption}</span> : null}
         </div>
       </div>
-      {isResizing && (
+      {canEditDocument && isResizing && (
         <span className="pointer-events-none absolute left-1 top-1 z-40 rounded bg-background/90 px-1.5 py-0.5 text-[10px] text-muted-foreground shadow">
           <Grip className="mr-1 inline size-3" />
           Resizing
@@ -467,6 +481,7 @@ function TableElementWithEdgeControls({
   element,
 }: RenderElementProps) {
   const editor = useSlate();
+  const canEditDocument = useSlateDocumentEditable();
   const tablePath = React.useMemo(() => {
     try {
       return ReactEditor.findPath(editor, element);
@@ -518,9 +533,13 @@ function TableElementWithEdgeControls({
     >
       <div
         contentEditable={false}
-        className="pointer-events-none absolute inset-0 z-10 opacity-0 transition-opacity group-hover/table:opacity-100 group-focus-within/table:opacity-100"
+        className={
+          canEditDocument
+            ? "pointer-events-none absolute inset-0 z-10 opacity-0 transition-opacity group-hover/table:opacity-100 group-focus-within/table:opacity-100"
+            : "hidden"
+        }
       >
-        {anchorCellPath ? (
+        {canEditDocument && anchorCellPath ? (
           <>
             <div className="pointer-events-auto absolute left-1 top-1">
               <button
@@ -796,6 +815,13 @@ export function renderLeaf({ attributes, children, leaf }: RenderLeafProps) {
   if (textLeaf.italic) el = <em>{el}</em>;
   if (textLeaf.underline) el = <u>{el}</u>;
   if (textLeaf.strikethrough || textLeaf.toRemove) el = <s>{el}</s>;
+  if (textLeaf.code) {
+    el = (
+      <code className="mx-px rounded border border-foreground/20 bg-foreground/15 px-1.5 py-0.5 font-mono text-[0.86em] leading-none">
+        {el}
+      </code>
+    );
+  }
 
   if (textLeaf.toRemove) {
     el = (

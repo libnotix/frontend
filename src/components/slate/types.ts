@@ -7,6 +7,7 @@ export type FormattedText = {
   italic?: boolean;
   underline?: boolean;
   strikethrough?: boolean;
+  code?: boolean;
   toAdd?: boolean;
   toRemove?: boolean;
   aiChangeSetId?: string;
@@ -137,7 +138,7 @@ export type SlateEditorNode =
   | TableCellNode
   | ImageNode;
 
-export type MarkType = "bold" | "italic" | "underline" | "strikethrough";
+export type MarkType = "bold" | "italic" | "underline" | "strikethrough" | "code";
 
 declare module "slate" {
   interface CustomTypes {
@@ -150,6 +151,7 @@ declare module "slate" {
 export type ChatMessage = {
   role: "user" | "ai";
   text: string;
+  attachedFiles?: Array<{ fileId: number; filename: string }>;
 };
 
 export type GroupedAiOperation = {

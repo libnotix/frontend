@@ -16,4 +16,5 @@ export const ALL_MARK_TYPES: MarkType[] = [
   "italic",
   "underline",
   "strikethrough",
+  "code",
 ];
