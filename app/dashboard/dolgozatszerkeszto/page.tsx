@@ -25,7 +25,19 @@ export function Draggable({ id, typeId }: { id: string; typeId: string }) {
    );
 }
 
-export function SortableItem({ id, typeId, index, isActive = true, onDelete }: { id: string; typeId: string; index: number; isActive?: boolean; onDelete?: () => void }) {
+export function SortableItem({
+   id,
+   typeId,
+   index,
+   isActive = true,
+   onDelete,
+}: {
+   id: string;
+   typeId: string;
+   index: number;
+   isActive?: boolean;
+   onDelete?: () => void;
+}) {
    const { ref, handleRef, isDragging } = useSortable({
       id: id,
       index: index,
@@ -44,6 +56,34 @@ export function SortableItem({ id, typeId, index, isActive = true, onDelete }: {
 
    const removeOption = (idToRemove: number) => {
       setOptions(options.filter((opt) => opt.id !== idToRemove));
+   };
+
+   const [premises, setPremises] = useState([
+      { id: 1, value: "1. Kifejezés", correctResponses: [] as number[] },
+      { id: 2, value: "2. Kifejezés", correctResponses: [] as number[] },
+      { id: 3, value: "3. Kifejezés", correctResponses: [] as number[] },
+   ]);
+
+   const addPremise = () => {
+      setPremises([...premises, { id: Date.now(), value: `${premises.length + 1}. Kifejezés`, correctResponses: [] as number[] }]);
+   };
+
+   const removePremise = (idToRemove: number) => {
+      setPremises(premises.filter((item) => item.id !== idToRemove));
+   };
+
+   const [responses, setResponses] = useState([
+      { id: 1, value: "A. Magyarázat" },
+      { id: 2, value: "B. Magyarázat" },
+      { id: 3, value: "C. Magyarázat" },
+   ]);
+
+   const addResponse = () => {
+      setResponses([...responses, { id: Date.now(), value: `${String.fromCharCode(65 + responses.length)}. Magyarázat` }]);
+   };
+
+   const removeResponse = (idToRemove: number) => {
+      setResponses(responses.filter((item) => item.id !== idToRemove));
    };
 
    return (
@@ -72,43 +112,183 @@ export function SortableItem({ id, typeId, index, isActive = true, onDelete }: {
                      <Textarea placeholder="További leírás hozzáadása..." className="resize-none h-32 bg-muted/30" />
                   </div>
 
-                  <div className="mb-8">
-                     <Label className="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-4 block">Válaszlehetőségek</Label>
+                  {typeId === "item-1" && (
+                     <div className="mb-8">
+                        <Label className="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-4 block">Válaszlehetőségek</Label>
 
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {options.map((option) => (
-                           <div
-                              key={option.id}
-                              className="border border-border rounded-lg p-3 flex items-center gap-3 relative group hover:border-muted-foreground transition-colors"
-                           >
-                              <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
-                              <Input
-                                 className="border-none shadow-none bg-transparent font-medium px-0 h-auto focus-visible:ring-0"
-                                 value={option.value}
-                                 onChange={(e) => {
-                                    setOptions(options.map((opt) => (opt.id === option.id ? { ...opt, value: e.target.value } : opt)));
-                                 }}
-                              />
-                              <Button
-                                 variant="ghost"
-                                 size="icon"
-                                 className="h-6 w-6 absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                 onClick={() => removeOption(option.id)}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           {options.map((option) => (
+                              <div
+                                 key={option.id}
+                                 className="border border-border rounded-lg p-3 flex items-center gap-3 relative group hover:border-muted-foreground transition-colors"
                               >
+                                 <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
+                                 <Input
+                                    className="border-none shadow-none bg-transparent font-medium px-0 h-auto focus-visible:ring-0"
+                                    value={option.value}
+                                    onChange={(e) => {
+                                       setOptions(options.map((opt) => (opt.id === option.id ? { ...opt, value: e.target.value } : opt)));
+                                    }}
+                                 />
+                                 <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6 absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    onClick={() => removeOption(option.id)}
+                                 >
+                                    <Trash2 className="h-4 w-4 text-muted-foreground" />
+                                 </Button>
+                              </div>
+                           ))}
+
+                           {/* Add Option Button */}
+                           <button
+                              onClick={addOption}
+                              className="border-2 border-dashed border-border rounded-lg p-3 flex items-center justify-center gap-2 text-muted-foreground hover:bg-muted/30 transition-colors font-medium text-sm"
+                           >
+                              <Plus className="h-4 w-4" /> Válaszlehetőség hozzáadása
+                           </button>
+                        </div>
+                     </div>
+                  )}
+
+                  {typeId === "item-2" && (
+                     <div className="mb-8">
+                        <Label className="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-4 block">Válaszlehetőségek</Label>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           <div className="border border-border rounded-lg p-3 flex items-center gap-3 relative group hover:border-muted-foreground transition-colors">
+                              <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
+                              <span>Igaz</span>
+                              <Button variant="ghost" size="icon" className="h-6 w-6 absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                  <Trash2 className="h-4 w-4 text-muted-foreground" />
                               </Button>
                            </div>
-                        ))}
-
-                        {/* Add Option Button */}
-                        <button
-                           onClick={addOption}
-                           className="border-2 border-dashed border-border rounded-lg p-3 flex items-center justify-center gap-2 text-muted-foreground hover:bg-muted/30 transition-colors font-medium text-sm"
-                        >
-                           <Plus className="h-4 w-4" /> Válaszlehetőség hozzáadása
-                        </button>
+                           <div className="border border-border rounded-lg p-3 flex items-center gap-3 relative group hover:border-muted-foreground transition-colors">
+                              <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
+                              <span>Hamis</span>
+                              <Button variant="ghost" size="icon" className="h-6 w-6 absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                 <Trash2 className="h-4 w-4 text-muted-foreground" />
+                              </Button>
+                           </div>
+                        </div>
                      </div>
-                  </div>
+                  )}
+
+                  {typeId === "item-3" && (
+                     <div className="mb-8">
+                        <Label className="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-4 block">Válasz</Label>
+
+                        <div className="flex flex-col gap-3 mb-6">
+                           <Textarea placeholder="Válasz hozzáadása..." className="resize-none h-32 bg-muted/30" />
+                        </div>
+                     </div>
+                  )}
+
+                  {typeId === "item-4" && (
+                     <div className="mb-8">
+                        <Label className="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-6 block">Párosítási lehetőségek</Label>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                           <div className="flex flex-col gap-3">
+                              
+                              {premises.map((item, index) => (
+                                 <div key={item.id} className="flex items-center gap-3 w-full group">
+                                    <div className="flex items-center gap-2 shrink-0">
+                                       <span className="font-bold text-muted-foreground w-4 text-right shrink-0">{index + 1}.</span>
+                                       <div className="grid grid-cols-2 bg-muted/40 rounded-md p-1 border border-border min-w-[40px] min-h-[34px] gap-1 shadow-inner">
+                                          {responses.length === 0 ? (
+                                             <span className="text-muted-foreground/50 text-[10px] uppercase font-bold flex items-center px-1">...</span>
+                                          ) : (
+                                             responses.map((resp, respIndex) => {
+                                                const letter = String.fromCharCode(65 + respIndex);
+                                                const isSelected = (item.correctResponses || []).includes(resp.id);
+                                                return (
+                                                   <button
+                                                      key={resp.id}
+                                                      onClick={() => {
+                                                         const current = item.correctResponses || [];
+                                                         const next = isSelected ? current.filter((id) => id !== resp.id) : [...current, resp.id];
+                                                         setPremises(premises.map((p) => (p.id === item.id ? { ...p, correctResponses: next } : p)));
+                                                      }}
+                                                      className={`h-6 w-6 rounded text-xs font-bold transition-all flex items-center justify-center ${
+                                                         isSelected ? "bg-primary text-primary-foreground shadow-sm scale-105" : "text-muted-foreground/60 hover:bg-muted-foreground/10 hover:text-muted-foreground"
+                                                      }`}
+                                                      title={resp.value}
+                                                   >
+                                                      {letter}
+                                                   </button>
+                                                );
+                                             })
+                                          )}
+                                       </div>
+                                    </div>
+                                    <div className="flex-1 border border-border rounded-lg p-2.5 flex items-center bg-card hover:border-muted-foreground transition-colors relative">
+                                       <Input
+                                          className="border-none shadow-none bg-transparent font-medium px-2 h-auto focus-visible:ring-0"
+                                          value={item.value}
+                                          onChange={(e) => setPremises(premises.map((p) => p.id === item.id ? { ...p, value: e.target.value } : p))}
+                                       />
+                                       <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-6 w-6 absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                          onClick={() => removePremise(item.id)}
+                                       >
+                                          <Trash2 className="h-4 w-4 text-muted-foreground" />
+                                       </Button>
+                                    </div>
+                                 </div>
+                              ))}
+                              <button
+                                 onClick={addPremise}
+                                 className="border-2 border-dashed border-border rounded-lg p-3 flex items-center justify-center gap-2 text-muted-foreground hover:bg-muted/30 transition-colors font-medium text-sm mt-3 w-full"
+                              >
+                                 <Plus className="h-4 w-4" /> Új Kifejezés
+                              </button>
+                           </div>
+
+                           <div className="flex flex-col gap-3">
+                              {responses.map((item, index) => (
+                                 <div key={item.id} className="flex items-center gap-2 w-full group">
+                                    <span className="font-bold text-muted-foreground w-8 text-right shrink-0">{String.fromCharCode(65 + index)}.</span>
+                                    <div className="flex-1 border border-border rounded-lg p-2.5 flex items-center bg-card hover:border-muted-foreground transition-colors relative">
+                                       <Input
+                                          className="border-none shadow-none bg-transparent font-medium px-2 h-auto focus-visible:ring-0"
+                                          value={item.value}
+                                          onChange={(e) => setResponses(responses.map((p) => p.id === item.id ? { ...p, value: e.target.value } : p))}
+                                       />
+                                       <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-6 w-6 absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                          onClick={() => removeResponse(item.id)}
+                                       >
+                                          <Trash2 className="h-4 w-4 text-muted-foreground" />
+                                       </Button>
+                                    </div>
+                                 </div>
+                              ))}
+                              <button
+                                 onClick={addResponse}
+                                 className="border-2 border-dashed border-border rounded-lg p-3 flex items-center justify-center gap-2 text-muted-foreground hover:bg-muted/30 transition-colors font-medium text-sm mt-3 w-full"
+                              >
+                                 <Plus className="h-4 w-4" /> Új Válasz
+                              </button>
+                           </div>
+                        </div>
+                     </div>
+                  )}
+
+                  {typeId === "item-5" && (
+                     <div className="mb-8">
+                        <Label className="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-4 block">Válasz</Label>
+
+                        <div className="flex flex-col gap-3 mb-6">
+                           <Textarea placeholder="Válasz hozzáadása..." className="resize-none h-32 bg-muted/30" />
+                        </div>
+                     </div>
+                  )}
 
                   {/* Footer */}
                   <div className="flex items-center justify-between pt-4 border-t border-border">
@@ -121,6 +301,7 @@ export function SortableItem({ id, typeId, index, isActive = true, onDelete }: {
                               pattern="[1-9]*"
                               className="w-16 h-8 text-center font-bold bg-muted/30"
                               defaultValue="5"
+                              placeholder="1-100"
                               onChange={(e) => {
                                  e.target.value = e.target.value.replace(/[^1-9]/g, "");
                               }}
@@ -267,11 +448,10 @@ const DolgozatSzerkeszto = () => {
                                  {activeDragId?.startsWith("palette-") && hoveredTargetId === item.id && (
                                     <div className="absolute -top-2 translate-y-[-50%] left-0 right-0 h-1.5 bg-primary shadow border border-primary/50 rounded-full pointer-events-none z-10" />
                                  )}
-                                 <SortableItem 
-                                    id={item.id} 
-                                    typeId={item.typeId} 
-                                    index={index} 
-                                    isActive={index === leftItems.length - 1}
+                                 <SortableItem
+                                    id={item.id}
+                                    typeId={item.typeId}
+                                    index={index}
                                     onDelete={() => setLeftItems((prev) => prev.filter((i) => i.id !== item.id))}
                                  />
                               </div>
@@ -286,7 +466,7 @@ const DolgozatSzerkeszto = () => {
                                     <Plus className="w-6 h-6" />
                                  </div>
                                  <h3 className="text-base font-bold">Új kérdés hozzáadása</h3>
-                                 <p className="text-sm text-muted-foreground mt-1">Kattints vagy húzz be egy típust a jobb oldalsávról</p>
+                                 <p className="text-sm text-muted-foreground mt-1">Húzz be egy újabb kérdést a hozzáadáshoz</p>
                               </div>
                            )}
                         </div>
