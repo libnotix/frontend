@@ -11,6 +11,7 @@ export type InlineTextLeaf = {
   italic?: boolean;
   underline?: boolean;
   strikethrough?: boolean;
+  code?: boolean;
 };
 
 function mergeMarks(
@@ -20,16 +21,17 @@ function mergeMarks(
 }
 
 /**
- * Parses markdown inline formatting: ***bold+italic***, **bold**, *italic*, ~~strikethrough~~.
+ * Parses markdown inline formatting: ***bold+italic***, **bold**, *italic*,
+ * ~~strikethrough~~, `inline code`, ``inline code with `backtick``` .
  * Handles nested and combined markers correctly.
  */
 function parseMarkdownInline(text: string): InlineTextLeaf[] {
   if (!text) return [{ text: "" }];
 
   const result: InlineTextLeaf[] = [];
-  // Matches: ***text***, **text**, *text*, ~~text~~
+  // Matches: ***text***, **text**, *text*, ~~text~~, ``text`with`tick``, `text`
   // Order matters: longest delimiter first to avoid partial matches
-  const re = /(\*{3})((?:(?!\1).)+?)\1|(\*{2})((?:(?!\3).)+?)\3|(\*)((?:(?!\5).)+?)\5|(~~)((?:(?!\7).)+?)\7/g;
+  const re = /(\*{3})((?:(?!\1).)+?)\1|(\*{2})((?:(?!\3).)+?)\3|(\*)((?:(?!\5).)+?)\5|(~~)((?:(?!\7).)+?)\7|(``)((?:(?!\9)[\s\S])+?)\9|(`)((?:(?!\11)[^`\n])+?)\11/g;
 
   let lastIndex = 0;
   let m: RegExpExecArray | null;
@@ -59,6 +61,12 @@ function parseMarkdownInline(text: string): InlineTextLeaf[] {
       for (const leaf of parseMarkdownInline(m[8])) {
         result.push({ ...leaf, strikethrough: true });
       }
+    } else if (m[9] === "``" && m[10]) {
+      // ``inline code with optional `backtick` inside``
+      result.push({ text: m[10], code: true });
+    } else if (m[11] === "`" && m[12]) {
+      // `inline code`
+      result.push({ text: m[12], code: true });
     }
 
     lastIndex = m.index + m[0].length;
@@ -81,7 +89,8 @@ function mergeAdjacent(leaves: InlineTextLeaf[]): InlineTextLeaf[] {
       !!prev.bold === !!leaf.bold &&
       !!prev.italic === !!leaf.italic &&
       !!prev.underline === !!leaf.underline &&
-      !!prev.strikethrough === !!leaf.strikethrough
+      !!prev.strikethrough === !!leaf.strikethrough &&
+      !!prev.code === !!leaf.code
     ) {
       prev.text += leaf.text;
     } else {
@@ -113,7 +122,8 @@ function marksFromStack(stack: string[]): Partial<InlineTextLeaf> {
 }
 
 /**
- * Parses inline markdown (**bold**, *italic*, ***bold+italic***, ~~strikethrough~~)
+ * Parses inline markdown (**bold**, *italic*, ***bold+italic***, ~~strikethrough~~,
+ * `inline code`, ``inline code with `backtick``` )
  * plus HTML: <u>, <b>, <strong>, <i>, <em>, <s>, <strike>, <del> (case-insensitive).
  * Unknown tags are left as literal text.
  */

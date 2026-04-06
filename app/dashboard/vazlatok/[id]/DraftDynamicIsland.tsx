@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useRef, useState } from "react";
+import { memo, useRef, useState, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
@@ -21,6 +21,8 @@ type DraftDynamicIslandProps = {
   lastSaved: Date | null;
   onSave: () => void;
   onDetailsOpen?: () => void;
+  /** Optional control rendered in the navbar center slot (e.g. share menu). */
+  shareMenu?: ReactNode;
 };
 
 const buttonSpring = {
@@ -253,11 +255,17 @@ const DraftDynamicIsland = ({
   lastSaved,
   onSave,
   onDetailsOpen,
+  shareMenu,
 }: DraftDynamicIslandProps) => {
   const router = useRouter();
 
   return (
     <>
+      {shareMenu ? (
+        <DynamicIslandSlot slot="center">
+          <div className="flex items-center justify-center px-1.5 py-1">{shareMenu}</div>
+        </DynamicIslandSlot>
+      ) : null}
       <LeftIsland
         title={title}
         onTitleChange={onTitleChange}

@@ -186,6 +186,18 @@ export function normalizeDraftApiResponse(payload: unknown): DraftEditorModel {
     ? (filesCandidate as DraftLinkedFile[])
     : [];
 
+  const shareRaw =
+    draftCandidate.shareToken ??
+    (typeof draftCandidate.share_token === "string" || draftCandidate.share_token === null
+      ? draftCandidate.share_token
+      : undefined);
+  const shareToken =
+    typeof shareRaw === "string"
+      ? shareRaw
+      : shareRaw === null
+        ? null
+        : undefined;
+
   return {
     id: typeof draftCandidate.id === "number" ? draftCandidate.id : undefined,
     title: typeof draftCandidate.title === "string" ? draftCandidate.title : "",
@@ -195,6 +207,7 @@ export function normalizeDraftApiResponse(payload: unknown): DraftEditorModel {
     contentContainer: parsed.container,
     files,
     updatedAt: normalizeDraftUpdatedAtToIso(draftCandidate.updatedAt),
+    shareToken,
   };
 }
 

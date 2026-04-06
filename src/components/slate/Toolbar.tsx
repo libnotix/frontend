@@ -171,6 +171,7 @@ export const Toolbar = ({ draftId }: { draftId?: string }) => {
     italic: <em>I</em>,
     underline: <u>U</u>,
     strikethrough: <s>S</s>,
+    code: <code>{"</>"}</code>,
   };
 
   const onInsertTable = () => {

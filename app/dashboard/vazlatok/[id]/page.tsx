@@ -22,6 +22,7 @@ import {
   extractCurrentPageContent,
   normalizeDraftUpdatedAtToIso,
 } from "@/features/drafts/content";
+import { DraftShareMenu } from "@/features/drafts/DraftShareMenu";
 import { draftKeys } from "@/features/drafts/queryKeys";
 import { DraftEditorModel } from "@/features/drafts/types";
 import {
@@ -257,6 +258,17 @@ const DraftEditorPage = () => {
     [debouncedTitleSave, setValue],
   );
 
+  const handleShareTokenChange = useCallback(
+    (token: string | null) => {
+      if (!draftId) return;
+      queryClient.setQueryData<DraftEditorModel | undefined>(
+        draftKeys.byId(draftId),
+        (prev) => (prev ? { ...prev, shareToken: token } : prev),
+      );
+    },
+    [draftId, queryClient],
+  );
+
   const renderExternalChat = useCallback(() => {
     if (!chatContainer) return null;
     return createPortal(
@@ -322,6 +334,15 @@ const DraftEditorPage = () => {
         isSaveError={saveMutation.isError}
         lastSaved={lastSaved}
         onSave={() => void saveDraft()}
+        shareMenu={
+          typeof draft?.id === "number" ? (
+            <DraftShareMenu
+              draftId={draft.id}
+              shareToken={draft.shareToken}
+              onTokenChange={handleShareTokenChange}
+            />
+          ) : null
+        }
       />
 
       {/* Main editor area */}

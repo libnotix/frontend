@@ -7,6 +7,16 @@ import { api } from "@/lib/api";
 import { getAiWebSocketUrl } from "@/lib/aiWebSocket";
 import { getEditorTabId } from "@/lib/editorTabId";
 import { getAuthCookies } from "@/actions/auth";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import {
   ChatMessage,
@@ -32,6 +42,32 @@ type ParsedAiPayload = Omit<GroupedAiResponse, "operations"> & {
   operations: AIOperation[];
   groups: NonNullable<GroupedAiResponse["groups"]>;
 };
+type LinkedDraftFile = {
+  fileId: number;
+  filename: string;
+  sizeBytes?: number | null;
+};
+
+function renderMessageWithInlineCode(text: string): React.ReactNode {
+  if (!text.includes("`")) return text;
+
+  const parts = text.split(/(`[^`]+`)/g);
+  return parts.map((part, index) => {
+    if (part.length >= 2 && part.startsWith("`") && part.endsWith("`")) {
+      const code = part.slice(1, -1);
+      if (!code) return <React.Fragment key={`inline-code-${index}`}>{part}</React.Fragment>;
+      return (
+        <code
+          key={`inline-code-${index}`}
+          className="mx-px rounded border border-foreground/20 bg-foreground/15 px-1.5 py-0.5 font-mono text-[0.86em] leading-none"
+        >
+          {code}
+        </code>
+      );
+    }
+    return <React.Fragment key={`inline-text-${index}`}>{part}</React.Fragment>;
+  });
+}
 
 function normalizeAction(value: unknown): AIOperation["action"] | null {
   if (
@@ -261,6 +297,7 @@ export const ChatPanel = ({
   const [loading, setLoading] = useState(false);
   const [streamingText, setStreamingText] = useState("");
   const [loadPhase, setLoadPhase] = useState<LoadPhase>("idle");
+  const [retryingAttempt, setRetryingAttempt] = useState<{ attempt: number; maxAttempts: number } | null>(null);
   const [pendingGroups, setPendingGroups] = useState<PendingAiEditGroup[]>([]);
   const revisionRef = useRef<string | undefined>(undefined);
   const streamBufferRef = useRef("");
@@ -273,6 +310,9 @@ export const ChatPanel = ({
   } | null>(null);
   const compact = density === "compact";
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [linkedFiles, setLinkedFiles] = useState<LinkedDraftFile[]>([]);
+  const [unlinkingFileIds, setUnlinkingFileIds] = useState<number[]>([]);
+  const [pendingRemovalFile, setPendingRemovalFile] = useState<LinkedDraftFile | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchChatHistory = useCallback(async () => {
@@ -281,26 +321,69 @@ export const ChatPanel = ({
       const res = await api.draftChatsIdGetRaw({ id: Number(draftId) });
       const data = await res.raw.json();
       const msgs = Array.isArray(data) ? data : data?.messages;
+      const linked: unknown[] = Array.isArray(data?.files) ? data.files : [];
+      const dedupedLinked = linked.reduce((acc: LinkedDraftFile[], file: unknown) => {
+        if (!file || typeof file !== "object") return acc;
+        const record = file as Record<string, unknown>;
+        if (!Number.isInteger(record.fileId) || typeof record.filename !== "string") {
+          return acc;
+        }
+        const fileId = Number(record.fileId);
+        if (!acc.some((existing) => existing.fileId === fileId)) {
+          acc.push({
+            fileId,
+            filename: record.filename,
+            sizeBytes:
+              typeof record.sizeBytes === "number" ? record.sizeBytes : null,
+          });
+        }
+        return acc;
+      }, []);
+      setLinkedFiles(dedupedLinked);
       if (Array.isArray(msgs)) {
         setMessages(
-          msgs.map((msg: any) => {
-            let textContent = msg.message || msg.content || msg.text || "";
+          msgs.map((msg: unknown) => {
+            const record = (msg ?? {}) as Record<string, unknown>;
+            let textContent = record.message || record.content || record.text || "";
             if (
-              typeof msg.content === "object" &&
-              msg.content?.messageToClient
+              typeof record.content === "object" &&
+              (record.content as { messageToClient?: unknown })?.messageToClient
             ) {
-              textContent = msg.content.messageToClient;
+              textContent = (record.content as { messageToClient: string })
+                .messageToClient;
             }
 
             const role =
-              msg.role === "ai" || msg.role === "assistant" ? "ai" : "user";
+              record.role === "ai" || record.role === "assistant" ? "ai" : "user";
             if (role === "user" && typeof textContent === "string") {
               textContent = textContent.split("\n\nSelected Context: ")[0];
             }
+            const normalizedTextContent =
+              typeof textContent === "string"
+                ? textContent
+                : String(textContent ?? "");
+            const attachedFilesFromMessage = Array.isArray(record.attachedFiles)
+              ? record.attachedFiles
+                  .filter((file: unknown): file is Record<string, unknown> => {
+                    if (!file || typeof file !== "object") return false;
+                    const fileRecord = file as Record<string, unknown>;
+                    return (
+                      Number.isInteger(fileRecord.fileId) &&
+                      typeof fileRecord.filename === "string"
+                    );
+                  })
+                  .map((file: Record<string, unknown>) => ({
+                    fileId: Number(file.fileId),
+                    filename: String(file.filename),
+                  }))
+              : undefined;
 
             return {
               role,
-              text: textContent,
+              text: normalizedTextContent,
+              ...(attachedFilesFromMessage && attachedFilesFromMessage.length > 0
+                ? { attachedFiles: attachedFilesFromMessage }
+                : {}),
             };
           }),
         );
@@ -309,6 +392,34 @@ export const ChatPanel = ({
       console.error("Failed to fetch chat history", err);
     }
   }, [draftId]);
+
+  const handleUnlinkLinkedFile = useCallback(
+    async (file: LinkedDraftFile) => {
+      if (!draftId) return;
+      if (unlinkingFileIds.includes(file.fileId)) return;
+
+      setUnlinkingFileIds((prev) => [...prev, file.fileId]);
+      try {
+        await api.draftLinkIdDeleteRaw({
+          id: Number(draftId),
+          draftLinkIdPostRequest: { fileId: file.fileId },
+        });
+        setLinkedFiles((prev) =>
+          prev.filter((linkedFile) => linkedFile.fileId !== file.fileId),
+        );
+        await fetchChatHistory();
+      } catch (error) {
+        console.error("Failed to unlink conversation file", error);
+        setMessages((prev) => [
+          ...prev,
+          { role: "ai", text: "A csatolt fájl eltávolítása nem sikerült." },
+        ]);
+      } finally {
+        setUnlinkingFileIds((prev) => prev.filter((id) => id !== file.fileId));
+      }
+    },
+    [draftId, fetchChatHistory, unlinkingFileIds],
+  );
 
   const onDraftServerTouchRef = useRef(onDraftServerTouch);
   useEffect(() => { onDraftServerTouchRef.current = onDraftServerTouch; }, [onDraftServerTouch]);
@@ -378,7 +489,15 @@ export const ChatPanel = ({
             return;
           }
 
+          if (type === "draftChatRetrying" && requestId && inflightRef.current?.requestId === requestId) {
+            const attempt = typeof msg.attempt === "number" ? msg.attempt : 1;
+            const maxAttempts = typeof msg.maxAttempts === "number" ? msg.maxAttempts : 8;
+            setRetryingAttempt({ attempt, maxAttempts });
+            return;
+          }
+
           if (type === "draftChatResult" && requestId && inflightRef.current?.requestId === requestId) {
+            setRetryingAttempt(null);
             const draftUpdatedAt =
               typeof msg.draftUpdatedAt === "string" ? msg.draftUpdatedAt : undefined;
             if (draftUpdatedAt) onDraftServerTouchRef.current?.(draftUpdatedAt);
@@ -392,6 +511,7 @@ export const ChatPanel = ({
             requestId &&
             inflightRef.current?.requestId === requestId
           ) {
+            setRetryingAttempt(null);
             const message =
               typeof msg.message === "string" ? msg.message : "WebSocket error";
             inflightRef.current.reject(new Error(message));
@@ -455,16 +575,34 @@ export const ChatPanel = ({
       ? `${userMessage}\n\nSelected Context: ${selectedText}`
       : userMessage;
 
-    setMessages((prev) => [...prev, { role: "user", text: userMessage || "Csatolt fájlok küldése..." }]);
     setInput("");
     setLoading(true);
     setLoadPhase("sending");
     setStreamingText("");
     streamBufferRef.current = "";
+    const attachedFilesForMessage: Array<{ fileId: number; filename: string }> = [];
+    const attachedFileIdsForRequest: number[] = [];
 
     try {
       if (draftId && attachedFiles.length > 0) {
+        const existingBySignature = new Map(
+          linkedFiles
+            .filter((file) => typeof file.filename === "string")
+            .map((file) => [`${file.filename}:${file.sizeBytes ?? -1}`, file]),
+        );
+        const newlyLinkedFiles: LinkedDraftFile[] = [];
         for (const file of attachedFiles) {
+          const signature = `${file.name}:${file.size}`;
+          const alreadyLinked = existingBySignature.get(signature);
+          if (alreadyLinked) {
+            attachedFileIdsForRequest.push(alreadyLinked.fileId);
+            attachedFilesForMessage.push({
+              fileId: alreadyLinked.fileId,
+              filename: alreadyLinked.filename,
+            });
+            continue;
+          }
+
           const uploadRes = await api.filesUploadPostRaw({ file });
           const uploadData = await uploadRes.raw.json();
           const fileId =
@@ -474,13 +612,33 @@ export const ChatPanel = ({
             uploadData?.data?.id;
 
           if (fileId) {
+            const numericFileId = Number(fileId);
             await api.draftLinkIdPostRaw({
               id: Number(draftId),
-              draftLinkIdPostRequest: { fileId: Number(fileId) },
+              draftLinkIdPostRequest: { fileId: numericFileId },
             });
+            attachedFileIdsForRequest.push(numericFileId);
+            attachedFilesForMessage.push({
+              fileId: numericFileId,
+              filename: file.name,
+            });
+            const linkedDraftFile: LinkedDraftFile = {
+              fileId: numericFileId,
+              filename: file.name,
+              sizeBytes: file.size,
+            };
+            newlyLinkedFiles.push(linkedDraftFile);
+            existingBySignature.set(signature, linkedDraftFile);
           }
         }
         setAttachedFiles([]);
+        if (newlyLinkedFiles.length > 0) {
+          setLinkedFiles((prev) => {
+            const byId = new Map(prev.map((file) => [file.fileId, file]));
+            for (const file of newlyLinkedFiles) byId.set(file.fileId, file);
+            return Array.from(byId.values());
+          });
+        }
         // Optional: trigger refresh on parent if needed
         // onDraftServerTouch?.();
       }
@@ -494,6 +652,26 @@ export const ChatPanel = ({
       setLoadPhase("idle");
       return;
     }
+
+    const uniqueAttachedFilesForMessage = attachedFilesForMessage.reduce<
+      Array<{ fileId: number; filename: string }>
+    >((acc, file) => {
+      if (!acc.some((existing) => existing.fileId === file.fileId)) acc.push(file);
+      return acc;
+    }, []);
+    const uniqueAttachedFileIdsForRequest = Array.from(
+      new Set(attachedFileIdsForRequest),
+    );
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        text: userMessage || "Csatolt fájlok küldése...",
+        ...(uniqueAttachedFilesForMessage.length > 0
+          ? { attachedFiles: uniqueAttachedFilesForMessage }
+          : {}),
+      },
+    ]);
 
     const waitForWsReady = async (maxMs = 8000) => {
       const start = Date.now();
@@ -509,7 +687,10 @@ export const ChatPanel = ({
       throw new Error("WebSocket not ready");
     };
 
-    const postAiEditRequest = async (baseRevision?: string) => {
+    const postAiEditRequest = async (
+      baseRevision?: string,
+      attachedFileIds?: number[],
+    ) => {
       if (!draftId) return null;
       setLoadPhase("sending");
       streamBufferRef.current = "";
@@ -538,6 +719,9 @@ export const ChatPanel = ({
                 editorOptions: [...ALL_BLOCK_TYPES, ...ALL_MARK_TYPES],
                 responseMode: "grouped",
                 baseRevision,
+                ...(attachedFileIds && attachedFileIds.length > 0
+                  ? { fileIds: attachedFileIds }
+                  : {}),
                 requestId,
                 idempotencyKey: `draft-${draftId}-edit-${Date.now()}`,
               },
@@ -574,7 +758,10 @@ export const ChatPanel = ({
         return;
       }
 
-      let data = (await postAiEditRequest(revisionRef.current)) as Record<
+      let data = (await postAiEditRequest(
+        revisionRef.current,
+        uniqueAttachedFileIdsForRequest,
+      )) as Record<
         string,
         unknown
       > | null;
@@ -594,7 +781,10 @@ export const ChatPanel = ({
         const latestRevision = await fetchLatestRevision();
         if (latestRevision) {
           revisionRef.current = latestRevision;
-          data = (await postAiEditRequest(latestRevision)) as Record<
+          data = (await postAiEditRequest(
+            latestRevision,
+            uniqueAttachedFileIdsForRequest,
+          )) as Record<
             string,
             unknown
           > | null;
@@ -656,6 +846,7 @@ export const ChatPanel = ({
       setLoading(false);
       setLoadPhase("idle");
       setStreamingText("");
+      setRetryingAttempt(null);
       streamBufferRef.current = "";
     }
   };
@@ -736,7 +927,7 @@ export const ChatPanel = ({
             </div>
           </div>
         )}
-        {loading && loadPhase === "processing" && streamingText.length === 0 && (
+        {loading && loadPhase === "processing" && streamingText.length === 0 && !retryingAttempt && (
           <div className="flex w-full justify-start" aria-live="polite" aria-busy="true">
             <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[1.25rem] rounded-bl-[0.35rem] bg-muted/50">
               <div className="flex gap-1">
@@ -744,6 +935,16 @@ export const ChatPanel = ({
                 <span className="size-1.5 rounded-full bg-foreground/30 animate-bounce [animation-delay:150ms]" />
                 <span className="size-1.5 rounded-full bg-foreground/20 animate-bounce [animation-delay:300ms]" />
               </div>
+            </div>
+          </div>
+        )}
+        {loading && retryingAttempt && (
+          <div className="flex w-full justify-start" aria-live="polite" aria-busy="true">
+            <div className="flex items-center gap-2 px-3.5 py-2 text-[13px] text-muted-foreground rounded-[1.25rem] rounded-bl-[0.35rem] bg-amber-500/10">
+              <Loader2 className="size-3.5 animate-spin text-amber-500" />
+              <span>
+                Az AI modell túlterhelt, újrapróbálkozás... ({retryingAttempt.attempt}/{retryingAttempt.maxAttempts})
+              </span>
             </div>
           </div>
         )}
@@ -832,7 +1033,22 @@ export const ChatPanel = ({
                     : "bg-muted/50 text-foreground rounded-[1.25rem] rounded-bl-[0.35rem]",
                 )}
               >
-                {msg.text}
+                {renderMessageWithInlineCode(msg.text)}
+                {msg.role === "user" &&
+                Array.isArray(msg.attachedFiles) &&
+                msg.attachedFiles.length > 0 ? (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {msg.attachedFiles.map((file) => (
+                      <span
+                        key={`${file.fileId}:${file.filename}`}
+                        className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[11px]"
+                      >
+                        <Paperclip className="h-3 w-3" />
+                        <span className="truncate max-w-[140px]">{file.filename}</span>
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </motion.div>
           ))}
@@ -845,6 +1061,39 @@ export const ChatPanel = ({
           compact ? "px-2.5 py-2" : "px-3 py-2.5",
         )}
       >
+        {linkedFiles.length > 0 && (
+          <div className="mb-2">
+            <p className="mb-1 text-[11px] font-medium text-muted-foreground">
+              Csatolt fájlok a beszélgetéshez
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {linkedFiles.map((file) => (
+                <div
+                  key={`linked-${file.fileId}`}
+                  className="inline-flex items-center gap-1 rounded-full bg-muted/40 px-2 py-1 text-xs"
+                >
+                  <Paperclip className="h-3 w-3 text-muted-foreground" />
+                  <span className="max-w-[160px] truncate text-foreground">
+                    {file.filename}
+                  </span>
+                  <button
+                    type="button"
+                    className="rounded-full p-0.5 hover:bg-black/10 dark:hover:bg-white/10 disabled:opacity-50"
+                    onClick={() => setPendingRemovalFile(file)}
+                    disabled={loading || unlinkingFileIds.includes(file.fileId)}
+                    title="Fájl eltávolítása a beszélgetésből"
+                  >
+                    {unlinkingFileIds.includes(file.fileId) ? (
+                      <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                    ) : (
+                      <X className="h-3 w-3 text-muted-foreground" />
+                    )}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         {attachedFiles.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-2">
             {attachedFiles.map((file, i) => (
@@ -920,6 +1169,34 @@ export const ChatPanel = ({
           </button>
         </div>
       </div>
+      <AlertDialog
+        open={pendingRemovalFile !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingRemovalFile(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Fájl eltávolítása?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Biztosan eltávolítod a(z) "{pendingRemovalFile?.filename ?? ""}" fájlt a
+              beszélgetésből?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Mégse</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const targetFile = pendingRemovalFile;
+                setPendingRemovalFile(null);
+                if (targetFile) void handleUnlinkLinkedFile(targetFile);
+              }}
+            >
+              Eltávolítás
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

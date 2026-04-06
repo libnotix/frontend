@@ -15,6 +15,8 @@ export type DraftEditorModel = {
   contentContainer?: DraftContentEnvelope;
   files: DraftLinkedFile[];
   updatedAt?: string;
+  /** Present when the draft has an active public share link (owner API only). */
+  shareToken?: string | null;
 };
 
 export type DraftEditorFormValues = {
