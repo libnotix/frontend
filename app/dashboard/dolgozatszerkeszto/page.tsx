@@ -25,128 +25,87 @@ export function Draggable({ id, typeId }: { id: string; typeId: string }) {
    );
 }
 
-export function SortableItem({ id, typeId, index, isActive = true }: { id: string; typeId: string; index: number; isActive?: boolean }) {
+export function SortableItem({ id, typeId, index, isActive = true, onDelete }: { id: string; typeId: string; index: number; isActive?: boolean; onDelete?: () => void }) {
    const { ref, handleRef, isDragging } = useSortable({
       id: id,
       index: index,
    });
 
+   const [options, setOptions] = useState([
+      { id: 1, value: "Teszt 1" },
+      { id: 2, value: "Teszt 2" },
+      { id: 3, value: "Teszt 3" },
+      { id: 4, value: "Teszt 4" },
+   ]);
+
+   const addOption = () => {
+      setOptions([...options, { id: Date.now(), value: `Teszt ${options.length + 1}` }]);
+   };
+
+   const removeOption = (idToRemove: number) => {
+      setOptions(options.filter((opt) => opt.id !== idToRemove));
+   };
+
    return (
-      <div 
-         ref={ref} 
-         className={`w-full pb-6 cursor-default ${isDragging ? "opacity-50" : ""}`}
-      >
-         <div className={`bg-card text-card-foreground p-6 w-full rounded-xl border-2 relative shadow-sm transition-colors ${isActive ? "border-primary" : "border-border"}`}>
-            
-            {/* Question Number Badge */}
+      <div ref={ref} className={`w-full pb-6 cursor-default ${isDragging ? "opacity-50" : ""}`}>
+         <div
+            className={`bg-card text-card-foreground p-6 w-full rounded-xl border-2 relative shadow-sm transition-colors ${isActive ? "border-primary" : "border-border"}`}
+         >
             <div className="absolute -left-3 top-8 bg-primary text-primary-foreground text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center z-10">
                {index + 1}
             </div>
 
             {isActive ? (
                <>
-                  {/* Drag Handle & Type Display */}
-                  <div className="flex items-center justify-between mb-4">
-                     <div className="text-xs font-bold tracking-wider text-muted-foreground uppercase flex items-center">
-                        QUESTION TITLE
-                     </div>
+                  <div className="flex items-center justify-between">
+                     <div className="text-xs font-bold tracking-wider text-muted-foreground uppercase flex items-center">Kérdés</div>
                   </div>
-
-                  {/* Question Title Input */}
                   <div className="mb-6">
-                     <Input 
-                        className="text-lg font-semibold py-6 border-none shadow-none focus-visible:ring-0 px-0 bg-transparent" 
-                        placeholder="Identify the function of Mitochondria in a cell."
-                        defaultValue="Identify the function of Mitochondria in a cell."
+                     <Input
+                        className="text-lg font-semibold py-6 border-none shadow-none focus-visible:ring-0 px-0 bg-transparent"
+                        placeholder="Kattintson ide, majd adja meg a feladat címét"
                      />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                     {/* Question Description */}
-                     <div>
-                        <Label className="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-2 block">
-                           QUESTION DESCRIPTION
-                        </Label>
-                        <Textarea 
-                           placeholder="Enter additional context for the question..." 
-                           className="resize-none h-32 bg-muted/30"
-                        />
-                     </div>
-
-                     {/* Visual Aid */}
-                     <div>
-                        <Label className="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-2 block">
-                           VISUAL AID
-                        </Label>
-                        <div className="border-2 border-dashed border-border rounded-lg h-32 flex flex-col items-center justify-center text-muted-foreground bg-muted/10 cursor-pointer hover:bg-muted/30 transition-colors">
-                           <ImageIcon className="h-6 w-6 mb-2" />
-                           <span className="text-xs font-medium">Upload Image</span>
-                        </div>
-                     </div>
+                  <div className="flex flex-col gap-3 mb-6">
+                     <Label className="text-xs font-bold tracking-wider text-muted-foreground uppercase">Leírás</Label>
+                     <Textarea placeholder="További leírás hozzáadása..." className="resize-none h-32 bg-muted/30" />
                   </div>
 
-                  {/* Grading Instructions */}
-                  <div className="mb-6">
-                     <div className="flex items-center justify-between mb-2">
-                        <Label className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
-                           GRADING INSTRUCTIONS &amp; CORRECT ANSWER KEY
-                        </Label>
-                        <div className="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                           <span className="text-blue-500">✨</span> AI Context
-                        </div>
-                     </div>
-                     <Textarea 
-                        placeholder="Provide guidance for AI or manual graders..." 
-                        className="resize-none h-20 bg-muted/30"
-                     />
-                  </div>
-
-                  {/* Answer Options */}
                   <div className="mb-8">
-                     <Label className="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-4 block">
-                        ANSWER OPTIONS
-                     </Label>
-                     
+                     <Label className="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-4 block">Válaszlehetőségek</Label>
+
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Correct Option */}
-                        <div className="border-2 border-green-500 bg-green-50/50 rounded-lg p-3 flex items-center gap-3 relative group">
-                           <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
-                           <Input 
-                              className="border-none shadow-none bg-transparent font-medium px-0 h-auto focus-visible:ring-0" 
-                              defaultValue="Produces ATP through cellular respiration" 
-                           />
-                           <Button variant="ghost" size="icon" className="h-6 w-6 absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Trash2 className="h-4 w-4 text-muted-foreground" />
-                           </Button>
-                        </div>
-
-                        {/* Incorrect Option */}
-                        <div className="border border-border rounded-lg p-3 flex items-center gap-3 relative group hover:border-muted-foreground transition-colors">
-                           <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
-                           <Input 
-                              className="border-none shadow-none bg-transparent font-medium px-0 h-auto focus-visible:ring-0" 
-                              defaultValue="Synthesizes protein for the cell" 
-                           />
-                           <Button variant="ghost" size="icon" className="h-6 w-6 absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Trash2 className="h-4 w-4 text-muted-foreground" />
-                           </Button>
-                        </div>
-
-                        {/* Incorrect Option */}
-                        <div className="border border-border rounded-lg p-3 flex items-center gap-3 relative group hover:border-muted-foreground transition-colors">
-                           <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
-                           <Input 
-                              className="border-none shadow-none bg-transparent font-medium px-0 h-auto focus-visible:ring-0" 
-                              defaultValue="Stores genetic information" 
-                           />
-                           <Button variant="ghost" size="icon" className="h-6 w-6 absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Trash2 className="h-4 w-4 text-muted-foreground" />
-                           </Button>
-                        </div>
+                        {options.map((option) => (
+                           <div
+                              key={option.id}
+                              className="border border-border rounded-lg p-3 flex items-center gap-3 relative group hover:border-muted-foreground transition-colors"
+                           >
+                              <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
+                              <Input
+                                 className="border-none shadow-none bg-transparent font-medium px-0 h-auto focus-visible:ring-0"
+                                 value={option.value}
+                                 onChange={(e) => {
+                                    setOptions(options.map((opt) => (opt.id === option.id ? { ...opt, value: e.target.value } : opt)));
+                                 }}
+                              />
+                              <Button
+                                 variant="ghost"
+                                 size="icon"
+                                 className="h-6 w-6 absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                 onClick={() => removeOption(option.id)}
+                              >
+                                 <Trash2 className="h-4 w-4 text-muted-foreground" />
+                              </Button>
+                           </div>
+                        ))}
 
                         {/* Add Option Button */}
-                        <button className="border-2 border-dashed border-border rounded-lg p-3 flex items-center justify-center gap-2 text-muted-foreground hover:bg-muted/30 transition-colors font-medium text-sm">
-                           <Plus className="h-4 w-4" /> Add another option
+                        <button
+                           onClick={addOption}
+                           className="border-2 border-dashed border-border rounded-lg p-3 flex items-center justify-center gap-2 text-muted-foreground hover:bg-muted/30 transition-colors font-medium text-sm"
+                        >
+                           <Plus className="h-4 w-4" /> Válaszlehetőség hozzáadása
                         </button>
                      </div>
                   </div>
@@ -155,23 +114,23 @@ export function SortableItem({ id, typeId, index, isActive = true }: { id: strin
                   <div className="flex items-center justify-between pt-4 border-t border-border">
                      <div className="flex items-center gap-6">
                         <div className="flex items-center gap-3">
-                           <Label className="text-sm font-semibold text-muted-foreground">Points</Label>
-                           <Input className="w-16 h-8 text-center font-bold bg-muted/30" defaultValue="5" />
-                        </div>
-                        <div className="flex items-center gap-3">
-                           <div className="w-8 h-4 bg-muted rounded-full relative cursor-pointer">
-                              <div className="w-3 h-3 bg-white rounded-full absolute left-0.5 top-0.5 shadow-sm"></div>
-                           </div>
-                           <Label className="text-sm font-semibold text-muted-foreground">Required</Label>
+                           <Label className="text-sm font-semibold text-muted-foreground">Kérdés pontszáma</Label>
+                           <Input
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[1-9]*"
+                              className="w-16 h-8 text-center font-bold bg-muted/30"
+                              defaultValue="5"
+                              onChange={(e) => {
+                                 e.target.value = e.target.value.replace(/[^1-9]/g, "");
+                              }}
+                           />
                         </div>
                      </div>
-                     
+
                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" className="text-muted-foreground hover:text-foreground font-semibold gap-2">
-                           <Copy className="h-4 w-4" /> Duplicate
-                        </Button>
-                        <Button variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-50 font-semibold gap-2">
-                           <Trash2 className="h-4 w-4" /> Remove
+                        <Button onClick={onDelete} variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-50 font-semibold gap-2">
+                           <Trash2 className="h-4 w-4" /> Törlés
                         </Button>
                      </div>
                   </div>
@@ -186,13 +145,8 @@ export function SortableItem({ id, typeId, index, isActive = true }: { id: strin
                   </div>
                </div>
             )}
-            
-            {/* Drag Handle specific overlay to prevent drag interference on inputs */}
-            <div 
-               ref={handleRef}
-               className="absolute top-0 right-0 w-8 h-8 cursor-grab flex items-center justify-center"
-               title="Drag to reorder"
-            >
+
+            <div ref={handleRef} className="absolute top-0 right-0 w-8 h-8 cursor-grab flex items-center justify-center" title="Drag to reorder">
                <div className="grid grid-cols-2 gap-0.5">
                   <div className="w-1 h-1 bg-muted-foreground rounded-full"></div>
                   <div className="w-1 h-1 bg-muted-foreground rounded-full"></div>
@@ -202,7 +156,6 @@ export function SortableItem({ id, typeId, index, isActive = true }: { id: strin
                   <div className="w-1 h-1 bg-muted-foreground rounded-full"></div>
                </div>
             </div>
-
          </div>
       </div>
    );
@@ -294,26 +247,13 @@ const DolgozatSzerkeszto = () => {
       >
          <div className="h-[calc(100vh-4rem)] w-full p-4 md:p-8 flex flex-col md:flex-row gap-4 md:gap-8 overflow-hidden">
             <Card className="flex-1 w-full border-2 flex flex-col min-h-0">
-               <CardContent className="flex-1 p-4 md:p-8 flex flex-col overflow-y-auto bg-stone-50/50">
+               <CardContent className="flex-1 p-4 md:p-8 flex flex-col overflow-y-auto">
                   <div className="flex items-center justify-between mb-8">
-                     <div>
-                        <div className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2">
-                           <span>Tanári felület</span>
-                           <span>/</span>
-                           <span>Feladatok</span>
-                           <span>/</span>
-                           <span>Biológia</span>
-                           <span>/</span>
-                           <span className="text-foreground">Új Biológia Dolgozat</span>
-                        </div>
-                        <h1 className="text-4xl font-extrabold tracking-tight">Új Biológia Dolgozat</h1>
-                        <p className="text-sm text-muted-foreground mt-3 flex items-center gap-2 font-medium">
-                           <Cloud className="w-4 h-4" /> Piszkozat mentve: 10:45
-                        </p>
-                     </div>
-                     <Button variant="outline" className="font-semibold gap-2 border-2 py-5 px-6 rounded-xl hover:bg-muted/50">
-                        <Share2 className="w-4 h-4" /> Együttműködés
-                     </Button>
+                     <Input
+                        className="font-semibold py-6 pl-2 border-none shadow-none px-0 focus-visible:ring-0 bg-transparent w-full text-center"
+                        placeholder="Új Dolgozat"
+                        style={{ fontSize: "24px" }}
+                     />
                   </div>
 
                   <div className="border-2 border-none flex-1 relative rounded-md">
@@ -327,7 +267,13 @@ const DolgozatSzerkeszto = () => {
                                  {activeDragId?.startsWith("palette-") && hoveredTargetId === item.id && (
                                     <div className="absolute -top-2 translate-y-[-50%] left-0 right-0 h-1.5 bg-primary shadow border border-primary/50 rounded-full pointer-events-none z-10" />
                                  )}
-                                 <SortableItem id={item.id} typeId={item.typeId} index={index} isActive={index === leftItems.length - 1} />
+                                 <SortableItem 
+                                    id={item.id} 
+                                    typeId={item.typeId} 
+                                    index={index} 
+                                    isActive={index === leftItems.length - 1}
+                                    onDelete={() => setLeftItems((prev) => prev.filter((i) => i.id !== item.id))}
+                                 />
                               </div>
                            ))}
                            {activeDragId?.startsWith("palette-") && hoveredTargetId === "droppable-1" && leftItems.length > 0 && (
