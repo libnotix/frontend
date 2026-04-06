@@ -188,10 +188,9 @@ export function SortableItem({
                   {typeId === "item-4" && (
                      <div className="mb-8">
                         <Label className="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-6 block">Párosítási lehetőségek</Label>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                            <div className="flex flex-col gap-3">
-                              
                               {premises.map((item, index) => (
                                  <div key={item.id} className="flex items-center gap-3 w-full group">
                                     <div className="flex items-center gap-2 shrink-0">
@@ -212,7 +211,9 @@ export function SortableItem({
                                                          setPremises(premises.map((p) => (p.id === item.id ? { ...p, correctResponses: next } : p)));
                                                       }}
                                                       className={`h-6 w-6 rounded text-xs font-bold transition-all flex items-center justify-center ${
-                                                         isSelected ? "bg-primary text-primary-foreground shadow-sm scale-105" : "text-muted-foreground/60 hover:bg-muted-foreground/10 hover:text-muted-foreground"
+                                                         isSelected
+                                                            ? "bg-primary text-primary-foreground shadow-sm scale-105"
+                                                            : "text-muted-foreground/60 hover:bg-muted-foreground/10 hover:text-muted-foreground"
                                                       }`}
                                                       title={resp.value}
                                                    >
@@ -227,7 +228,7 @@ export function SortableItem({
                                        <Input
                                           className="border-none shadow-none bg-transparent font-medium px-2 h-auto focus-visible:ring-0"
                                           value={item.value}
-                                          onChange={(e) => setPremises(premises.map((p) => p.id === item.id ? { ...p, value: e.target.value } : p))}
+                                          onChange={(e) => setPremises(premises.map((p) => (p.id === item.id ? { ...p, value: e.target.value } : p)))}
                                        />
                                        <Button
                                           variant="ghost"
@@ -256,7 +257,7 @@ export function SortableItem({
                                        <Input
                                           className="border-none shadow-none bg-transparent font-medium px-2 h-auto focus-visible:ring-0"
                                           value={item.value}
-                                          onChange={(e) => setResponses(responses.map((p) => p.id === item.id ? { ...p, value: e.target.value } : p))}
+                                          onChange={(e) => setResponses(responses.map((p) => (p.id === item.id ? { ...p, value: e.target.value } : p)))}
                                        />
                                        <Button
                                           variant="ghost"
@@ -439,38 +440,43 @@ const DolgozatSzerkeszto = () => {
 
                   <div className="border-2 border-none flex-1 relative rounded-md">
                      {leftItems.length === 0 && (
-                        <div className="absolute inset-0 flex items-center justify-center p-4 text-muted-foreground text-lg z-0">Húzd ide a feladatot...</div>
+                        <Droppable id="droppable-1">
+                           <div className="absolute inset-0 flex items-center justify-center p-4 text-muted-foreground text-lg z-0">
+                              Húzd ide a feladatot...
+                           </div>
+                        </Droppable>
                      )}
-                     <Droppable id="droppable-1">
-                        <div className="space-y-4 w-full z-10 relative">
-                           {leftItems.map((item, index) => (
-                              <div key={item.id} className="relative w-full">
-                                 {activeDragId?.startsWith("palette-") && hoveredTargetId === item.id && (
-                                    <div className="absolute -top-2 translate-y-[-50%] left-0 right-0 h-1.5 bg-primary shadow border border-primary/50 rounded-full pointer-events-none z-10" />
-                                 )}
-                                 <SortableItem
-                                    id={item.id}
-                                    typeId={item.typeId}
-                                    index={index}
-                                    onDelete={() => setLeftItems((prev) => prev.filter((i) => i.id !== item.id))}
-                                 />
-                              </div>
-                           ))}
-                           {activeDragId?.startsWith("palette-") && hoveredTargetId === "droppable-1" && leftItems.length > 0 && (
-                              <div className="w-full h-1.5 bg-primary shadow border border-primary/50 rounded-full pointer-events-none transition-all" />
-                           )}
 
-                           {leftItems.length > 0 && (
-                              <div className="border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center justify-center bg-card hover:bg-muted/30 transition-colors cursor-pointer mt-8">
+                     <div className="space-y-4 w-full z-10 relative flex flex-col h-full min-h-[200px]">
+                        {leftItems.map((item, index) => (
+                           <div key={item.id} className="relative w-full">
+                              {activeDragId?.startsWith("palette-") && hoveredTargetId === item.id && (
+                                 <div className="absolute -top-2 translate-y-[-50%] left-0 right-0 h-1.5 bg-primary shadow border border-primary/50 rounded-full pointer-events-none z-10" />
+                              )}
+                              <SortableItem
+                                 id={item.id}
+                                 typeId={item.typeId}
+                                 index={index}
+                                 onDelete={() => setLeftItems((prev) => prev.filter((i) => i.id !== item.id))}
+                              />
+                           </div>
+                        ))}
+
+                        {leftItems.length > 0 && (
+                           <Droppable id="droppable-1">
+                              <div className="relative border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center justify-center bg-card hover:bg-muted/30 transition-colors cursor-pointer mt-8 w-full min-h-[150px]">
+                                 {activeDragId?.startsWith("palette-") && hoveredTargetId === "droppable-1" && (
+                                    <div className="absolute -top-1 left-0 right-0 h-1.5 bg-primary shadow border border-primary/50 rounded-full pointer-events-none transition-all" />
+                                 )}
                                  <div className="bg-blue-100 text-blue-600 rounded-full w-12 h-12 flex items-center justify-center mb-4 shadow-sm">
                                     <Plus className="w-6 h-6" />
                                  </div>
                                  <h3 className="text-base font-bold">Új kérdés hozzáadása</h3>
                                  <p className="text-sm text-muted-foreground mt-1">Húzz be egy újabb kérdést a hozzáadáshoz</p>
                               </div>
-                           )}
-                        </div>
-                     </Droppable>
+                           </Droppable>
+                        )}
+                     </div>
                   </div>
                </CardContent>
             </Card>
