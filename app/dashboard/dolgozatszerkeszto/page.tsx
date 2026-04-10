@@ -140,8 +140,6 @@ export function SortableItem({
                                  </Button>
                               </div>
                            ))}
-
-                           {/* Add Option Button */}
                            <button
                               onClick={addOption}
                               className="border-2 border-dashed border-border rounded-lg p-3 flex items-center justify-center gap-2 text-muted-foreground hover:bg-muted/30 transition-colors font-medium text-sm"
@@ -160,16 +158,10 @@ export function SortableItem({
                            <div className="border border-border rounded-lg p-3 flex items-center gap-3 relative group hover:border-muted-foreground transition-colors">
                               <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
                               <span>Igaz</span>
-                              <Button variant="ghost" size="icon" className="h-6 w-6 absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                 <Trash2 className="h-4 w-4 text-muted-foreground" />
-                              </Button>
                            </div>
                            <div className="border border-border rounded-lg p-3 flex items-center gap-3 relative group hover:border-muted-foreground transition-colors">
                               <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
                               <span>Hamis</span>
-                              <Button variant="ghost" size="icon" className="h-6 w-6 absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                 <Trash2 className="h-4 w-4 text-muted-foreground" />
-                              </Button>
                            </div>
                         </div>
                      </div>
@@ -447,7 +439,7 @@ const DolgozatSzerkeszto = () => {
                         </Droppable>
                      )}
 
-                     <div className="space-y-4 w-full z-10 relative flex flex-col h-full min-h-[200px]">
+                     <div className="space-y-4 w-full z-10 relative flex flex-col">
                         {leftItems.map((item, index) => (
                            <div key={item.id} className="relative w-full">
                               {activeDragId?.startsWith("palette-") && hoveredTargetId === item.id && (
