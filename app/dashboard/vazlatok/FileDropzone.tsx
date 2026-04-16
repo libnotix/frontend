@@ -14,6 +14,18 @@ import { API_BASE_PATH, api } from "@/lib/api";
 import { getAuthCookies } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 
+const ACCEPTED_EXTENSIONS = new Set([
+  ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".md",
+]);
+
+function isAcceptedFile(file: File): boolean {
+  if (file.type.startsWith("image/")) return true;
+  const ext = file.name.includes(".")
+    ? `.${file.name.split(".").pop()!.toLowerCase()}`
+    : "";
+  return ACCEPTED_EXTENSIONS.has(ext);
+}
+
 interface FileDropzoneProps {
   draftId?: string;
   onUploadSuccess?: () => void;
@@ -152,8 +164,9 @@ export const FileDropzone = ({
   }, [processQueueItem, queue]);
 
   const addFilesToQueue = useCallback((files: File[]) => {
-    if (files.length === 0) return;
-    const nextItems = files.map((file) => ({
+    const accepted = files.filter(isAcceptedFile);
+    if (accepted.length === 0) return;
+    const nextItems = accepted.map((file) => ({
       id: `${file.name}-${file.lastModified}-${crypto.randomUUID()}`,
       file,
       status: "pending" as QueueStatus,
@@ -206,6 +219,7 @@ export const FileDropzone = ({
           id="file-upload"
           className="hidden"
           multiple
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.md,image/*"
           onChange={handleFileSelect}
           disabled={!draftId}
         />
@@ -214,8 +228,11 @@ export const FileDropzone = ({
           <UploadCloud className="w-5 h-5 text-primary" />
         </div>
         <p className="text-sm font-medium mb-1">Upload knowledge files</p>
-        <p className="text-xs text-muted-foreground mb-4">
+        <p className="text-xs text-muted-foreground mb-1">
           Drag and drop files or select multiple files
+        </p>
+        <p className="text-[11px] text-muted-foreground/70 mb-3">
+          PDF, Word, Excel, PowerPoint, képek, szöveges fájlok (.txt, .md)
         </p>
         <label
           htmlFor="file-upload"

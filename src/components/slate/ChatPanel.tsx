@@ -1117,6 +1117,7 @@ export const ChatPanel = ({
             ref={fileInputRef}
             className="hidden"
             multiple
+            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.md,image/*"
             onChange={(e) => {
               if (e.target.files) {
                 setAttachedFiles(prev => [...prev, ...Array.from(e.target.files!)]);
@@ -1127,7 +1128,7 @@ export const ChatPanel = ({
           <button
             type="button"
             className="p-1.5 text-muted-foreground hover:text-foreground rounded-full transition-colors shrink-0"
-            title="Fájl csatolása"
+            title="Fájl csatolása (PDF, Word, Excel, PowerPoint, kép, .txt, .md)"
             onClick={() => fileInputRef.current?.click()}
           >
             <Paperclip className="w-4 h-4" />
