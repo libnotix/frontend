@@ -2,7 +2,11 @@
 
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
@@ -14,17 +18,19 @@ import { useRegister } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { AuthLayout } from "@/components/auth/AuthLayout";
-import { ArrowRight, Mail, UserCircleIcon } from "lucide-react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  UserCircleIcon,
+  Mail01Icon,
+  UserAccountIcon,
+  Tick01Icon
+} from "@hugeicons/core-free-icons";
 
 const CreateAccount = () => {
   const router = useRouter();
   const registerMutation = useRegister();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<RegisterInputs>({
+  const { register, handleSubmit, formState: { errors } } = useForm<RegisterInputs>({
     resolver: zodResolver(registerSchema),
   });
 
@@ -47,11 +53,7 @@ const CreateAccount = () => {
     >
       <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
         <CardContent className="pt-6">
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            autoComplete="off"
-            className="space-y-4 animate-fade-in"
-          >
+          <form onSubmit={handleSubmit(onSubmit)} autoComplete="off" className="space-y-4 animate-fade-in">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Vezetéknév</Label>
@@ -62,7 +64,7 @@ const CreateAccount = () => {
                     {...register("lastName")}
                   />
                   <div className="absolute left-3 top-2.5 text-muted-foreground">
-                    <UserCircleIcon size={18} />
+                    <HugeiconsIcon icon={UserCircleIcon} size={18} />
                   </div>
                 </div>
                 {errors.lastName && (
@@ -80,7 +82,7 @@ const CreateAccount = () => {
                     {...register("firstName")}
                   />
                   <div className="absolute left-3 top-2.5 text-muted-foreground">
-                    <UserCircleIcon size={18} />
+                    <HugeiconsIcon icon={UserCircleIcon} size={18} />
                   </div>
                 </div>
                 {errors.firstName && (
@@ -101,7 +103,7 @@ const CreateAccount = () => {
                   {...register("email")}
                 />
                 <div className="absolute left-3 top-2.5 text-muted-foreground">
-                  <Mail size={18} />
+                  <HugeiconsIcon icon={Mail01Icon} size={18} />
                 </div>
               </div>
               {errors.email && (
@@ -121,7 +123,7 @@ const CreateAccount = () => {
                   {...register("username")}
                 />
                 <div className="absolute left-3 top-2.5 text-muted-foreground">
-                  <UserCircleIcon size={18} />
+                  <HugeiconsIcon icon={UserAccountIcon} size={18} />
                 </div>
               </div>
               {errors.username && (
@@ -136,11 +138,9 @@ const CreateAccount = () => {
               className="w-full bg-primary hover:bg-primary/90 transition-all duration-300 mt-6"
               disabled={registerMutation.isPending}
             >
-              {registerMutation.isPending ? (
-                <LoadingSpinner />
-              ) : (
+              {registerMutation.isPending ? <LoadingSpinner /> : (
                 <span className="flex items-center gap-2">
-                  Regisztráció <ArrowRight size={18} />
+                  Regisztráció <HugeiconsIcon icon={Tick01Icon} size={16} />
                 </span>
               )}
             </Button>
@@ -149,10 +149,7 @@ const CreateAccount = () => {
         <CardFooter className="justify-center pb-6">
           <p className="text-sm text-muted-foreground">
             Már van fiókod?{" "}
-            <Link
-              href="/auth/login"
-              className="text-primary hover:underline font-medium transition-colors"
-            >
+            <Link href="/auth/login" className="text-primary hover:underline font-medium transition-colors">
               Bejelentkezés
             </Link>
           </p>
