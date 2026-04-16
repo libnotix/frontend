@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { API_BASE_PATH } from "@/lib/apiBase";
 
 const ACCESS_TOKEN_COOKIE = "tnrsgd_accessToken";
 const REFRESH_TOKEN_COOKIE = "tnrsgd_refreshToken";
@@ -48,7 +49,7 @@ export async function refreshTokenAction() {
   }
 
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/auth/refresh`, {
+    const response = await fetch(`${API_BASE_PATH}/auth/refresh`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
