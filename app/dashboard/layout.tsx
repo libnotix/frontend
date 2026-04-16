@@ -15,13 +15,11 @@ export default async function DashboardLayout({
     }
 
     return (
-        <div className="flex flex-col h-screen">
+        <div className="flex flex-col">
             <DashboardNavbar user={session.user} />
 
             <AuthProvider user={session.user}>
-                <div className="flex flex-col flex-1 min-h-0">
-                    {children}
-                </div>
+                {children}
             </AuthProvider>
         </div>
     );
