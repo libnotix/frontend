@@ -1,52 +1,83 @@
-import { DefaultApi, Configuration, Middleware, ResponseContext, ErrorContext } from "../api";
+import {
+  DefaultApi,
+  Configuration,
+  Middleware,
+  ResponseContext,
+} from "../api";
 import { getAuthCookies, refreshTokenAction } from "../actions/auth";
+import { API_BASE_PATH } from "./apiBase";
 
-const BASE_PATH = "https://tanarseged-b.vrolandd.hu";
+export { API_BASE_PATH };
+
+let refreshInFlight: Promise<string | null> | null = null;
+
+function dedupedRefresh(): Promise<string | null> {
+  if (!refreshInFlight) {
+    refreshInFlight = refreshTokenAction().finally(() => {
+      refreshInFlight = null;
+    });
+  }
+  return refreshInFlight;
+}
 
 const tokenRefreshMiddleware: Middleware = {
-   onError: async (context: ErrorContext) => {
-      const { response } = context;
-      if (response && response.status === 401) {
-         // Avoid infinite loops if the refresh endpoint itself returns 401
-         if (context.url.includes("/auth/refresh")) {
-            return response;
-         }
+  pre: async (context) => {
+    const { accessToken } = await getAuthCookies();
+    if (accessToken) {
+      return {
+        ...context,
+        init: {
+          ...context.init,
+          headers: {
+            ...context.init.headers,
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      };
+    }
+  },
+  post: async (context: ResponseContext) => {
+    const { response, url, init, fetch: fetchApi } = context;
+    if (response.status !== 401) {
+      return undefined;
+    }
+    if (url.includes("/auth/refresh")) {
+      return undefined;
+    }
 
-         try {
-            const newToken = await refreshTokenAction();
-            if (newToken) {
-               // Retry the original request with the new token
-               const newInit = {
-                  ...context.init,
-                  headers: {
-                     ...context.init.headers,
-                     Authorization: `Bearer ${newToken}`,
-                  },
-               };
-               return context.fetch(context.url, newInit);
-            }
-         } catch (error) {
-            console.error("Token refresh failed:", error);
-         }
+    try {
+      const newToken = await dedupedRefresh();
+      if (newToken) {
+        const newInit = {
+          ...init,
+          headers: {
+            ...init.headers,
+            Authorization: `Bearer ${newToken}`,
+          },
+        };
+        return fetchApi(url, newInit);
       }
-      return response;
-   },
+    } catch (error) {
+      console.error("Token refresh failed:", error);
+    }
+    return undefined;
+  },
 };
 
 export const api = new DefaultApi(
-   new Configuration({
-      basePath: BASE_PATH,
-      middleware: [tokenRefreshMiddleware],
-   }),
+  new Configuration({
+    basePath: API_BASE_PATH,
+    middleware: [tokenRefreshMiddleware],
+  }),
 );
 
 export const getServerApi = async () => {
-   const { accessToken } = await getAuthCookies();
+  const { accessToken } = await getAuthCookies();
 
-   const config = new Configuration({
-      basePath: BASE_PATH,
-      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-   });
+  const config = new Configuration({
+    basePath: API_BASE_PATH,
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+  });
 
-   return new DefaultApi(config);
+  return new DefaultApi(config);
 };
