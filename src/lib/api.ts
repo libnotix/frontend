@@ -3,15 +3,25 @@ import {
   Configuration,
   Middleware,
   ResponseContext,
-  ErrorContext,
 } from "../api";
 import { getAuthCookies, refreshTokenAction } from "../actions/auth";
+import { API_BASE_PATH } from "./apiBase";
 
-export const API_BASE_PATH = "http://localhost:3020";
+export { API_BASE_PATH };
+
+let refreshInFlight: Promise<string | null> | null = null;
+
+function dedupedRefresh(): Promise<string | null> {
+  if (!refreshInFlight) {
+    refreshInFlight = refreshTokenAction().finally(() => {
+      refreshInFlight = null;
+    });
+  }
+  return refreshInFlight;
+}
 
 const tokenRefreshMiddleware: Middleware = {
   pre: async (context) => {
-    // Dynamically fetch from the server action on the client
     const { accessToken } = await getAuthCookies();
     if (accessToken) {
       return {
@@ -26,30 +36,31 @@ const tokenRefreshMiddleware: Middleware = {
       };
     }
   },
-  onError: async (context: ErrorContext) => {
-    const { response } = context;
-    if (response && response.status === 401) {
-      if (context.url.includes("/auth/refresh")) {
-        return response;
-      }
-
-      try {
-        const newToken = await refreshTokenAction();
-        if (newToken) {
-          const newInit = {
-            ...context.init,
-            headers: {
-              ...context.init.headers,
-              Authorization: `Bearer ${newToken}`,
-            },
-          };
-          return context.fetch(context.url, newInit);
-        }
-      } catch (error) {
-        console.error("Token refresh failed:", error);
-      }
+  post: async (context: ResponseContext) => {
+    const { response, url, init, fetch: fetchApi } = context;
+    if (response.status !== 401) {
+      return undefined;
     }
-    return response;
+    if (url.includes("/auth/refresh")) {
+      return undefined;
+    }
+
+    try {
+      const newToken = await dedupedRefresh();
+      if (newToken) {
+        const newInit = {
+          ...init,
+          headers: {
+            ...init.headers,
+            Authorization: `Bearer ${newToken}`,
+          },
+        };
+        return fetchApi(url, newInit);
+      }
+    } catch (error) {
+      console.error("Token refresh failed:", error);
+    }
+    return undefined;
   },
 };
 
