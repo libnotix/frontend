@@ -2,18 +2,19 @@
 
 import { memo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginStartSchema, loginEndSchema, LoginStartInputs, LoginEndInputs } from "@/lib/schemas";
+import {
+  loginStartSchema,
+  loginEndSchema,
+  LoginStartInputs,
+  LoginEndInputs,
+} from "@/lib/schemas";
 import { useLoginStart, useLoginEnd } from "@/hooks/useAuth";
 import { setAuthCookies } from "@/actions/auth";
 import { toast } from "sonner";
@@ -24,8 +25,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { AuthLayout } from "@/components/auth/AuthLayout";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { Mail01Icon, Tick01Icon } from "@hugeicons/core-free-icons";
+import { ArrowRight, Mail } from "lucide-react";
 
 const LoginPage = () => {
   const router = useRouter();
@@ -94,7 +94,11 @@ const LoginPage = () => {
       <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
         <CardContent className="pt-6">
           {step === "start" ? (
-            <form onSubmit={handleSubmitStart(onStartSubmit)} autoComplete="off" className="space-y-4 animate-fade-in">
+            <form
+              onSubmit={handleSubmitStart(onStartSubmit)}
+              autoComplete="off"
+              className="space-y-4 animate-fade-in"
+            >
               <div className="space-y-2">
                 <Label>Email</Label>
                 <div className="relative">
@@ -103,8 +107,8 @@ const LoginPage = () => {
                     className="pl-10"
                     {...registerStart("email")}
                   />
-                  <div className="absolute left-3 top-2.5 text-muted-foreground">
-                    <HugeiconsIcon icon={Mail01Icon} size={18} />
+                  <div className="absolute left-3 top-0 h-full items-center flex text-muted-foreground">
+                    <Mail className="size-5" />
                   </div>
                 </div>
                 {errorsStart.email && (
@@ -118,11 +122,18 @@ const LoginPage = () => {
                 className="w-full bg-primary hover:bg-primary/90 transition-all duration-300"
                 disabled={loginStartMutation.isPending}
               >
-                {loginStartMutation.isPending ? <LoadingSpinner /> : "Kód küldése"}
+                {loginStartMutation.isPending ? (
+                  <LoadingSpinner />
+                ) : (
+                  "Kód küldése"
+                )}
               </Button>
             </form>
           ) : (
-            <form onSubmit={handleSubmitEnd(onEndSubmit)} className="space-y-6 animate-fade-in-right">
+            <form
+              onSubmit={handleSubmitEnd(onEndSubmit)}
+              className="space-y-6 animate-fade-in-right"
+            >
               <div className="space-y-2 flex flex-col items-center">
                 <Label className="mb-2">Kód</Label>
                 <InputOTP
@@ -155,9 +166,11 @@ const LoginPage = () => {
                   className="w-full bg-primary hover:bg-primary/90 transition-all duration-300"
                   disabled={loginEndMutation.isPending}
                 >
-                  {loginEndMutation.isPending ? <LoadingSpinner /> : (
+                  {loginEndMutation.isPending ? (
+                    <LoadingSpinner />
+                  ) : (
                     <span className="flex items-center gap-2">
-                      Belépés <HugeiconsIcon icon={Tick01Icon} size={16} />
+                      Belépés <ArrowRight />
                     </span>
                   )}
                 </Button>
@@ -178,7 +191,10 @@ const LoginPage = () => {
           <CardFooter className="justify-center pb-6">
             <p className="text-sm text-muted-foreground">
               Nincs még fiókod?{" "}
-              <Link href="/auth/register" className="text-primary hover:underline font-medium transition-colors">
+              <Link
+                href="/auth/register"
+                className="text-primary hover:underline font-medium transition-colors"
+              >
                 Regisztráció
               </Link>
             </p>

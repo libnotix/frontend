@@ -186,6 +186,809 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiResponse"
+  /ai/query:
+    post:
+      summary: Free Gemini AI query
+      description: Sends a free-form prompt to the Gemini model and returns the generated text response.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FreeQueryRequest"
+      responses:
+        "200":
+          description: AI response generated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      text:
+                        type: string
+                        description: Generated text from the AI model
+        "400":
+          description: Missing or invalid prompt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "500":
+          description: AI generation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /subjects:
+    get:
+      summary: List all subjects
+      description: Returns all subjects for filtering and class tagging. Any authenticated user.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of subjects
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      subjects:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Subject"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    post:
+      summary: Create a subject
+      description: Creates a new subject (admin only). For filtering and data mining.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSubjectRequest"
+      responses:
+        "201":
+          description: Subject created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      subject:
+                        $ref: "#/components/schemas/Subject"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  /classes:
+    get:
+      summary: List all school classes
+      description: Returns all school classes. Accessible by teachers and admins.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of school classes
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      classes:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/SchoolClass"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    post:
+      summary: Create a school class
+      description: Creates a new school class. Any teacher or admin. Creator is added as class member.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClassRequest"
+      responses:
+        "201":
+          description: School class created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      class:
+                        $ref: "#/components/schemas/SchoolClass"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /classes/{id}:
+    get:
+      summary: Get a school class by ID
+      description: Returns a single school class. Accessible by teachers and admins.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: School class found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      class:
+                        $ref: "#/components/schemas/SchoolClass"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "404":
+          description: School class not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    put:
+      summary: Update a school class
+      description: >
+        Updates a school class. User must be a class member or admin.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateClassRequest"
+      responses:
+        "200":
+          description: School class updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      class:
+                        $ref: "#/components/schemas/SchoolClass"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "403":
+          description: Forbidden — not a class member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "404":
+          description: School class not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    delete:
+      summary: Delete a school class
+      description: Deletes a school class. Only accessible by admins.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: School class deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "403":
+          description: Forbidden — only admins can delete classes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "404":
+          description: School class not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /classes/{id}/students:
+    get:
+      summary: List students in a class
+      description: Returns students enrolled in this class. Class member or admin.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of students
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      students:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Student"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Class not found
+    post:
+      summary: Add a student to a class
+      description: Creates a new student and enrolls them in the class. Class member or admin.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStudentRequest"
+      responses:
+        "201":
+          description: Student created and enrolled
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      student:
+                        $ref: "#/components/schemas/Student"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: School class not found
+  /classes/{id}/students/{studentId}:
+    delete:
+      summary: Remove a student from a class
+      description: Removes enrollment only; student record remains. Class member or admin.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Enrollment removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  /classes/{id}/members:
+    get:
+      summary: List class members (teachers)
+      description: Returns users who are members of this class. Class member or admin.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of members
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      members:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Class not found
+    post:
+      summary: Add a teacher to a class
+      description: Adds a user as class member. Class member or admin.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+              properties:
+                userId:
+                  type: integer
+      responses:
+        "201":
+          description: Member added
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      member:
+                        $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Class or user not found
+        "409":
+          description: Already a member
+  /classes/{id}/members/{userId}:
+    delete:
+      summary: Remove a teacher from a class
+      description: Removes user from class members. Class member or admin.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Member removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  /me/classes:
+    get:
+      summary: Get my classes (student)
+      description: For current user linked as a student; returns all classes they are enrolled in.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of classes
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      classes:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/SchoolClass"
+        "401":
+          description: Unauthorized
+  /students/{id}:
+    put:
+      summary: Update a student (rename)
+      description: Update firstName, lastName, email. Class member of any class the student is in, or admin.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStudentRequest"
+      responses:
+        "200":
+          description: Student updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      student:
+                        $ref: "#/components/schemas/Student"
+        "400":
+          description: Validation error
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Student not found
+  /files/upload:
+    post:
+      summary: Upload a file
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: File uploaded
+  /files:
+    get:
+      summary: List all files for user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of files
+  /files/download/{id}:
+    get:
+      summary: Download a file
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: File stream
+  /drafts:
+    get:
+      summary: List all drafts for user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of drafts
+    post:
+      summary: Create a draft
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDraftRequest"
+      responses:
+        "201":
+          description: Draft created
+  /drafts/{id}:
+    get:
+      summary: Get a specific draft
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Draft details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      draft:
+                        type: object
+                      files:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/DraftLinkedFile"
+    put:
+      summary: Update a draft
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDraftRequest"
+      responses:
+        "200":
+          description: Draft updated
+    delete:
+      summary: Delete a draft
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Draft deleted
+  /draft-link/{id}:
+    post:
+      summary: Link a file to a draft
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileId:
+                  type: integer
+      responses:
+        "200":
+          description: OK
+    get:
+      summary: Get files linked to a draft
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      files:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/DraftLinkedFile"
+    delete:
+      summary: Unlink a file from a draft
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileId:
+                  type: integer
+      responses:
+        "200":
+          description: OK
+  /draft-chats/{id}:
+    post:
+      summary: Send a message to the AI draft editor
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: responseMode
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [legacy, grouped, dual]
+          description: Controls payload shape during rollout. Defaults to `grouped`.
+        - name: x-draft-chat-response-mode
+          in: header
+          required: false
+          schema:
+            type: string
+            enum: [legacy, grouped, dual]
+          description: Header override for response payload mode. Defaults to grouped response.
+        - name: idempotency-key
+          in: header
+          required: false
+          schema:
+            type: string
+          description: Optional replay key. Same key and base revision produce the same changeSetId.
+        - name: x-request-id
+          in: header
+          required: false
+          schema:
+            type: string
+          description: Optional request correlation id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DraftChatRequest"
+      responses:
+        "200":
+          description: AI generated structured edits
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      response:
+                        oneOf:
+                          - $ref: "#/components/schemas/DraftAiEditResponse"
+                          - $ref: "#/components/schemas/DraftAiEditDualResponse"
+                          - $ref: "#/components/schemas/DraftAiLegacyResponse"
+    get:
+      summary: Get chat history for draft
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Chat history
 components:
   securitySchemes:
     bearerAuth:
@@ -273,3 +1076,403 @@ components:
           type: string
           format: date-time
           nullable: true
+    Subject:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    CreateSubjectRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+    SchoolClass:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        classNumber:
+          type: integer
+        subjectId:
+          type: integer
+          nullable: true
+        icon:
+          type: string
+          nullable: true
+        color:
+          type: string
+          nullable: true
+        createdBy:
+          type: integer
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+    CreateClassRequest:
+      type: object
+      required:
+        - name
+        - classNumber
+      properties:
+        name:
+          type: string
+        classNumber:
+          type: integer
+          minimum: 1
+          maximum: 13
+        subjectId:
+          type: integer
+        icon:
+          type: string
+        color:
+          type: string
+    UpdateClassRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        classNumber:
+          type: integer
+          minimum: 1
+          maximum: 13
+        subjectId:
+          type: integer
+          nullable: true
+        icon:
+          type: string
+          nullable: true
+        color:
+          type: string
+          nullable: true
+    Student:
+      type: object
+      properties:
+        id:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          nullable: true
+        userId:
+          type: integer
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+    CreateStudentRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+    UpdateStudentRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          nullable: true
+    FreeQueryRequest:
+      type: object
+      required:
+        - prompt
+      properties:
+        prompt:
+          type: string
+          description: The prompt to send to the AI model
+        model:
+          type: string
+          description: Gemini model to use (defaults to gemini-flash-latest)
+          default: gemini-flash-latest
+          example: gemini-flash-latest
+        systemInstruction:
+          type: string
+          description: System instruction for the AI model (defaults to "You are a helpful assistant.")
+          default: "You are a helpful assistant."
+    CreateDraftRequest:
+      type: object
+      required:
+        - title
+        - format
+        - content
+      properties:
+        title:
+          type: string
+        format:
+          type: string
+          enum: [sima_vazlat, oravazlat, eves_tanterv, egyeb]
+        content:
+          type: object
+    UpdateDraftRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        format:
+          type: string
+          enum: [sima_vazlat, oravazlat, eves_tanterv, egyeb]
+        content:
+          type: object
+    DraftLinkedFile:
+      type: object
+      required:
+        - fileId
+        - filename
+      properties:
+        fileId:
+          type: integer
+        filename:
+          type: string
+        sizeBytes:
+          type: integer
+          nullable: true
+        mimeType:
+          type: string
+          nullable: true
+        contextStatus:
+          type: string
+          enum: [ready, processing, fallback, blocked, error]
+        contextMode:
+          type: string
+          enum: [gemini_file, fallback_text, none]
+        statusMessage:
+          type: string
+    SlateNode:
+      type: object
+      additionalProperties: true
+    DraftChatRequest:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+        currentContext:
+          oneOf:
+            - type: array
+              items:
+                $ref: "#/components/schemas/SlateNode"
+            - $ref: "#/components/schemas/SlateNode"
+            - type: string
+          description: Current editor Slate JSON (array, node, or page envelope). String is accepted only for JSON-serialized content.
+        editorOptions:
+          type: array
+          items:
+            type: string
+          description: Optional allowed Slate elements or editor constraints.
+        baseRevision:
+          oneOf:
+            - type: string
+            - type: integer
+          description: Client draft revision used for this request. Used to detect stale edits.
+        responseMode:
+          type: string
+          enum: [legacy, grouped, dual]
+          description: Optional request-level mode override. Defaults to grouped.
+        requestId:
+          type: string
+          description: Optional correlation id echoed by the server.
+        idempotencyKey:
+          type: string
+          description: Optional replay key for deterministic change set generation.
+    AiDiffGroup:
+      type: object
+      required:
+        - groupId
+        - groupIndex
+        - label
+        - pageId
+        - operationCount
+      properties:
+        groupId:
+          type: string
+        groupIndex:
+          type: integer
+        label:
+          type: string
+        pageId:
+          type: string
+          description: Page/sheet identifier; currently always default-page.
+        operationCount:
+          type: integer
+          description: Number of grouped operations controlled by one accept/reject.
+    AiDiffTarget:
+      type: object
+      required:
+        - pathVersion
+      properties:
+        targetNodeId:
+          type: string
+        path:
+          type: array
+          items:
+            type: integer
+        pathVersion:
+          type: string
+        startOffset:
+          type: integer
+        endOffset:
+          type: integer
+        insertPosition:
+          type: string
+          enum: [before, after, inside]
+    AiDiffOperation:
+      type: object
+      required:
+        - operationId
+        - changeSetId
+        - groupId
+        - groupIndex
+        - opIndex
+        - action
+        - target
+      properties:
+        operationId:
+          type: string
+        changeSetId:
+          type: string
+        groupId:
+          type: string
+        groupIndex:
+          type: integer
+        opIndex:
+          type: integer
+        action:
+          type: string
+          enum: [add, remove, replace]
+        target:
+          $ref: "#/components/schemas/AiDiffTarget"
+        oldContent:
+          type: array
+          items:
+            $ref: "#/components/schemas/SlateNode"
+        newContent:
+          type: array
+          items:
+            $ref: "#/components/schemas/SlateNode"
+    AiConflictInfo:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum: [stale_revision, invalid_target, invalid_payload]
+        message:
+          type: string
+        operationId:
+          type: string
+        groupId:
+          type: string
+        expectedRevision:
+          type: string
+        actualRevision:
+          type: string
+        hint:
+          type: string
+    DraftAiEditResponse:
+      type: object
+      required:
+        - changeSetId
+        - baseRevision
+        - resultRevision
+        - groups
+        - operations
+        - conflicts
+        - checksum
+        - messageToClient
+      properties:
+        changeSetId:
+          type: string
+        requestId:
+          type: string
+        baseRevision:
+          type: string
+        resultRevision:
+          type: string
+        groups:
+          type: array
+          items:
+            $ref: "#/components/schemas/AiDiffGroup"
+        operations:
+          type: array
+          items:
+            $ref: "#/components/schemas/AiDiffOperation"
+        conflicts:
+          type: array
+          items:
+            $ref: "#/components/schemas/AiConflictInfo"
+        checksum:
+          type: string
+        messageToClient:
+          type: string
+    LegacyAiOperation:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          type: string
+          enum: [append, prepend, replace, remove, add]
+        targetNodeId:
+          type: string
+          description: Preferred stable node id target for replace/remove operations.
+        path:
+          type: array
+          items:
+            type: integer
+        content:
+          oneOf:
+            - type: string
+            - type: object
+            - type: array
+              items:
+                $ref: "#/components/schemas/SlateNode"
+    DraftAiLegacyResponse:
+      type: object
+      required:
+        - messageToClient
+        - operations
+      properties:
+        messageToClient:
+          type: string
+        operations:
+          type: array
+          items:
+            $ref: "#/components/schemas/LegacyAiOperation"
+    DraftAiEditDualResponse:
+      allOf:
+        - $ref: "#/components/schemas/DraftAiEditResponse"
+        - type: object
+          required:
+            - legacyOperations
+          properties:
+            legacyOperations:
+              type: array
+              items:
+                $ref: "#/components/schemas/LegacyAiOperation"
