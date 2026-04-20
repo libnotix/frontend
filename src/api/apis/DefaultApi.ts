@@ -36,6 +36,12 @@ import type {
   DraftLinkIdGet200Response,
   DraftLinkIdPostRequest,
   DraftsIdGet200Response,
+  ExamChatsIdPostRequest,
+  ExamLinkIdPostRequest,
+  ExamsIdPutRequest,
+  ExamsIdQuestionsPutRequest,
+  ExamsIdSubmissionsPostRequest,
+  ExamsPostRequest,
   FreeQueryRequest,
   LoginEndRequest,
   LoginStartRequest,
@@ -44,6 +50,7 @@ import type {
   RegisterRequest,
   SubjectsGet200Response,
   SubjectsPost201Response,
+  SubmissionsIdPutRequest,
   UpdateClassRequest,
   UpdateDraftRequest,
   UpdateStudentRequest,
@@ -92,6 +99,18 @@ import {
     DraftLinkIdPostRequestToJSON,
     DraftsIdGet200ResponseFromJSON,
     DraftsIdGet200ResponseToJSON,
+    ExamChatsIdPostRequestFromJSON,
+    ExamChatsIdPostRequestToJSON,
+    ExamLinkIdPostRequestFromJSON,
+    ExamLinkIdPostRequestToJSON,
+    ExamsIdPutRequestFromJSON,
+    ExamsIdPutRequestToJSON,
+    ExamsIdQuestionsPutRequestFromJSON,
+    ExamsIdQuestionsPutRequestToJSON,
+    ExamsIdSubmissionsPostRequestFromJSON,
+    ExamsIdSubmissionsPostRequestToJSON,
+    ExamsPostRequestFromJSON,
+    ExamsPostRequestToJSON,
     FreeQueryRequestFromJSON,
     FreeQueryRequestToJSON,
     LoginEndRequestFromJSON,
@@ -108,6 +127,8 @@ import {
     SubjectsGet200ResponseToJSON,
     SubjectsPost201ResponseFromJSON,
     SubjectsPost201ResponseToJSON,
+    SubmissionsIdPutRequestFromJSON,
+    SubmissionsIdPutRequestToJSON,
     UpdateClassRequestFromJSON,
     UpdateClassRequestToJSON,
     UpdateDraftRequestFromJSON,
@@ -227,12 +248,78 @@ export interface DraftsPostRequest {
     createDraftRequest: CreateDraftRequest;
 }
 
+export interface ExamChatsIdGetRequest {
+    id: number;
+}
+
+export interface ExamChatsIdPostOperationRequest {
+    id: number;
+    examChatsIdPostRequest?: ExamChatsIdPostRequest;
+}
+
+export interface ExamLinkIdDeleteRequest {
+    id: number;
+    examLinkIdPostRequest?: ExamLinkIdPostRequest;
+}
+
+export interface ExamLinkIdGetRequest {
+    id: number;
+}
+
+export interface ExamLinkIdPostOperationRequest {
+    id: number;
+    examLinkIdPostRequest?: ExamLinkIdPostRequest;
+}
+
+export interface ExamsIdDeleteRequest {
+    id: number;
+}
+
+export interface ExamsIdGetRequest {
+    id: number;
+}
+
+export interface ExamsIdPutOperationRequest {
+    id: number;
+    examsIdPutRequest?: ExamsIdPutRequest;
+}
+
+export interface ExamsIdQuestionsPutOperationRequest {
+    id: number;
+    examsIdQuestionsPutRequest?: ExamsIdQuestionsPutRequest;
+}
+
+export interface ExamsIdShareDeleteRequest {
+    id: number;
+}
+
+export interface ExamsIdSharePostRequest {
+    id: number;
+}
+
+export interface ExamsIdSubmissionsGetRequest {
+    id: number;
+}
+
+export interface ExamsIdSubmissionsPostOperationRequest {
+    id: number;
+    examsIdSubmissionsPostRequest?: ExamsIdSubmissionsPostRequest;
+}
+
+export interface ExamsPostOperationRequest {
+    examsPostRequest?: ExamsPostRequest;
+}
+
 export interface FilesDownloadIdGetRequest {
     id: number;
 }
 
 export interface FilesUploadPostRequest {
     file?: Blob;
+}
+
+export interface PublicExamsTokenGetRequest {
+    token: string;
 }
 
 export interface StudentsIdPutRequest {
@@ -242,6 +329,36 @@ export interface StudentsIdPutRequest {
 
 export interface SubjectsPostRequest {
     createSubjectRequest: CreateSubjectRequest;
+}
+
+export interface SubmissionsIdAiReviewPostRequest {
+    id: number;
+}
+
+export interface SubmissionsIdDeleteRequest {
+    id: number;
+}
+
+export interface SubmissionsIdDigitizePostRequest {
+    id: number;
+}
+
+export interface SubmissionsIdFinalizePostRequest {
+    id: number;
+}
+
+export interface SubmissionsIdGetRequest {
+    id: number;
+}
+
+export interface SubmissionsIdPagesPostRequest {
+    id: number;
+    file?: Blob;
+}
+
+export interface SubmissionsIdPutOperationRequest {
+    id: number;
+    submissionsIdPutRequest?: SubmissionsIdPutRequest;
 }
 
 /**
@@ -1534,6 +1651,671 @@ export class DefaultApi extends runtime.BaseAPI {
     }
 
     /**
+     * Get exam chat history
+     */
+    async examChatsIdGetRaw(requestParameters: ExamChatsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling examChatsIdGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/exam-chats/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Get exam chat history
+     */
+    async examChatsIdGet(requestParameters: ExamChatsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.examChatsIdGetRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Exam AI chat (text reply JSON)
+     */
+    async examChatsIdPostRaw(requestParameters: ExamChatsIdPostOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling examChatsIdPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/exam-chats/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ExamChatsIdPostRequestToJSON(requestParameters['examChatsIdPostRequest']),
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Exam AI chat (text reply JSON)
+     */
+    async examChatsIdPost(requestParameters: ExamChatsIdPostOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.examChatsIdPostRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Unlink file
+     */
+    async examLinkIdDeleteRaw(requestParameters: ExamLinkIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling examLinkIdDelete().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/exam-link/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ExamLinkIdPostRequestToJSON(requestParameters['examLinkIdPostRequest']),
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Unlink file
+     */
+    async examLinkIdDelete(requestParameters: ExamLinkIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.examLinkIdDeleteRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * List linked files
+     */
+    async examLinkIdGetRaw(requestParameters: ExamLinkIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling examLinkIdGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/exam-link/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * List linked files
+     */
+    async examLinkIdGet(requestParameters: ExamLinkIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.examLinkIdGetRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Link file to exam
+     */
+    async examLinkIdPostRaw(requestParameters: ExamLinkIdPostOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling examLinkIdPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/exam-link/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ExamLinkIdPostRequestToJSON(requestParameters['examLinkIdPostRequest']),
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Link file to exam
+     */
+    async examLinkIdPost(requestParameters: ExamLinkIdPostOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.examLinkIdPostRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * List my exams
+     */
+    async examsGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/exams`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * List my exams
+     */
+    async examsGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.examsGetRaw(initOverrides);
+    }
+
+    /**
+     * Delete exam
+     */
+    async examsIdDeleteRaw(requestParameters: ExamsIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling examsIdDelete().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/exams/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Delete exam
+     */
+    async examsIdDelete(requestParameters: ExamsIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.examsIdDeleteRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Get exam with questions and linked files
+     */
+    async examsIdGetRaw(requestParameters: ExamsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling examsIdGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/exams/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Get exam with questions and linked files
+     */
+    async examsIdGet(requestParameters: ExamsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.examsIdGetRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Update exam metadata
+     */
+    async examsIdPutRaw(requestParameters: ExamsIdPutOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling examsIdPut().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/exams/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ExamsIdPutRequestToJSON(requestParameters['examsIdPutRequest']),
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Update exam metadata
+     */
+    async examsIdPut(requestParameters: ExamsIdPutOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.examsIdPutRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Replace all questions (ordered); cannot remove questions if submissions exist
+     */
+    async examsIdQuestionsPutRaw(requestParameters: ExamsIdQuestionsPutOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling examsIdQuestionsPut().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/exams/{id}/questions`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ExamsIdQuestionsPutRequestToJSON(requestParameters['examsIdQuestionsPutRequest']),
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Replace all questions (ordered); cannot remove questions if submissions exist
+     */
+    async examsIdQuestionsPut(requestParameters: ExamsIdQuestionsPutOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.examsIdQuestionsPutRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Disable share token
+     */
+    async examsIdShareDeleteRaw(requestParameters: ExamsIdShareDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling examsIdShareDelete().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/exams/{id}/share`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Disable share token
+     */
+    async examsIdShareDelete(requestParameters: ExamsIdShareDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.examsIdShareDeleteRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Enable share token for public read-only exam
+     */
+    async examsIdSharePostRaw(requestParameters: ExamsIdSharePostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling examsIdSharePost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/exams/{id}/share`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Enable share token for public read-only exam
+     */
+    async examsIdSharePost(requestParameters: ExamsIdSharePostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.examsIdSharePostRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * List submissions for exam
+     */
+    async examsIdSubmissionsGetRaw(requestParameters: ExamsIdSubmissionsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling examsIdSubmissionsGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/exams/{id}/submissions`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * List submissions for exam
+     */
+    async examsIdSubmissionsGet(requestParameters: ExamsIdSubmissionsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.examsIdSubmissionsGetRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Create submission (manual or OCR stub)
+     */
+    async examsIdSubmissionsPostRaw(requestParameters: ExamsIdSubmissionsPostOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling examsIdSubmissionsPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/exams/{id}/submissions`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ExamsIdSubmissionsPostRequestToJSON(requestParameters['examsIdSubmissionsPostRequest']),
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Create submission (manual or OCR stub)
+     */
+    async examsIdSubmissionsPost(requestParameters: ExamsIdSubmissionsPostOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.examsIdSubmissionsPostRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Create exam (dolgozat)
+     */
+    async examsPostRaw(requestParameters: ExamsPostOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/exams`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ExamsPostRequestToJSON(requestParameters['examsPostRequest']),
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Create exam (dolgozat)
+     */
+    async examsPost(requestParameters: ExamsPostOperationRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.examsPostRaw(requestParameters, initOverrides);
+    }
+
+    /**
      * Download a file
      */
     async filesDownloadIdGetRaw(requestParameters: FilesDownloadIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
@@ -1743,6 +2525,42 @@ export class DefaultApi extends runtime.BaseAPI {
     }
 
     /**
+     * Public exam (no correctAnswer in questions)
+     */
+    async publicExamsTokenGetRaw(requestParameters: PublicExamsTokenGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['token'] == null) {
+            throw new runtime.RequiredError(
+                'token',
+                'Required parameter "token" was null or undefined when calling publicExamsTokenGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/public/exams/{token}`;
+        urlPath = urlPath.replace(`{${"token"}}`, encodeURIComponent(String(requestParameters['token'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Public exam (no correctAnswer in questions)
+     */
+    async publicExamsTokenGet(requestParameters: PublicExamsTokenGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.publicExamsTokenGetRaw(requestParameters, initOverrides);
+    }
+
+    /**
      * Home page
      */
     async rootGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
@@ -1911,6 +2729,338 @@ export class DefaultApi extends runtime.BaseAPI {
     async subjectsPost(requestParameters: SubjectsPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SubjectsPost201Response> {
         const response = await this.subjectsPostRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     * Run AI / deterministic review
+     */
+    async submissionsIdAiReviewPostRaw(requestParameters: SubmissionsIdAiReviewPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling submissionsIdAiReviewPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/submissions/{id}/ai-review`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Run AI / deterministic review
+     */
+    async submissionsIdAiReviewPost(requestParameters: SubmissionsIdAiReviewPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.submissionsIdAiReviewPostRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Delete submission
+     */
+    async submissionsIdDeleteRaw(requestParameters: SubmissionsIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling submissionsIdDelete().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/submissions/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Delete submission
+     */
+    async submissionsIdDelete(requestParameters: SubmissionsIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.submissionsIdDeleteRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * OCR / extract answers from uploaded pages via AI
+     */
+    async submissionsIdDigitizePostRaw(requestParameters: SubmissionsIdDigitizePostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling submissionsIdDigitizePost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/submissions/{id}/digitize`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * OCR / extract answers from uploaded pages via AI
+     */
+    async submissionsIdDigitizePost(requestParameters: SubmissionsIdDigitizePostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.submissionsIdDigitizePostRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Finalize grading (sum scores)
+     */
+    async submissionsIdFinalizePostRaw(requestParameters: SubmissionsIdFinalizePostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling submissionsIdFinalizePost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/submissions/{id}/finalize`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Finalize grading (sum scores)
+     */
+    async submissionsIdFinalizePost(requestParameters: SubmissionsIdFinalizePostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.submissionsIdFinalizePostRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Get submission with answers and question definitions
+     */
+    async submissionsIdGetRaw(requestParameters: SubmissionsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling submissionsIdGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/submissions/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Get submission with answers and question definitions
+     */
+    async submissionsIdGet(requestParameters: SubmissionsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.submissionsIdGetRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Upload scanned pages (multipart, field `file`)
+     */
+    async submissionsIdPagesPostRaw(requestParameters: SubmissionsIdPagesPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling submissionsIdPagesPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const consumes: runtime.Consume[] = [
+            { contentType: 'multipart/form-data' },
+        ];
+        // @ts-ignore: canConsumeForm may be unused
+        const canConsumeForm = runtime.canConsumeForm(consumes);
+
+        let formParams: { append(param: string, value: any): any };
+        let useForm = false;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        useForm = canConsumeForm;
+        if (useForm) {
+            formParams = new FormData();
+        } else {
+            formParams = new URLSearchParams();
+        }
+
+        if (requestParameters['file'] != null) {
+            formParams.append('file', requestParameters['file'] as any);
+        }
+
+
+        let urlPath = `/submissions/{id}/pages`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: formParams,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Upload scanned pages (multipart, field `file`)
+     */
+    async submissionsIdPagesPost(requestParameters: SubmissionsIdPagesPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.submissionsIdPagesPostRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Update answers and/or teacher scores
+     */
+    async submissionsIdPutRaw(requestParameters: SubmissionsIdPutOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling submissionsIdPut().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/submissions/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: SubmissionsIdPutRequestToJSON(requestParameters['submissionsIdPutRequest']),
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Update answers and/or teacher scores
+     */
+    async submissionsIdPut(requestParameters: SubmissionsIdPutOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.submissionsIdPutRaw(requestParameters, initOverrides);
     }
 
 }
