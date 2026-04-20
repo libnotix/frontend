@@ -1,9 +1,10 @@
 "use client";
 
 import { taskTypeLabel } from "./constants";
+import type { ExamTaskTypeId } from "./examTaskTypes";
 
 type QuestionInactivePreviewProps = {
-   typeId: string;
+   typeId: ExamTaskTypeId;
 };
 
 export function QuestionInactivePreview({ typeId }: QuestionInactivePreviewProps) {

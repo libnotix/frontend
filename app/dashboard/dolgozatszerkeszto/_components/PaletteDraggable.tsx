@@ -2,8 +2,9 @@
 
 import { useDraggable } from "@dnd-kit/react";
 import { taskTypeLabel } from "./constants";
+import type { ExamTaskTypeId } from "./examTaskTypes";
 
-type PaletteDraggableProps = { id: string; typeId: string };
+type PaletteDraggableProps = { id: string; typeId: ExamTaskTypeId };
 
 export function PaletteDraggable({ id, typeId }: PaletteDraggableProps) {
    const { ref } = useDraggable({ id });
