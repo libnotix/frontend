@@ -84,9 +84,8 @@ export default function ClassList() {
               >
                 <Button
                   variant="destructive"
-                  className="max-w-[100px] absolute right-0.5 mr-2 z-20 bg-white/5 hover:bg-red-500 hover:text-white text-gray-300 border border-white/10 transition-all duration-300" onClick={() => {
-                    handleDelete(cls.id)
-                  }}
+                  className="max-w-[100px] absolute right-0.5 mr-2 z-20 bg-white/5 hover:bg-red-500 hover:text-white text-gray-300 border border-white/10 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                  onClick={() => handleDelete(cls.id)}
                 >
                   Törlés
                 </Button>

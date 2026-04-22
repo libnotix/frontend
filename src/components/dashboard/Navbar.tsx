@@ -22,9 +22,9 @@ const DashboardNavbar = ({
     user: User;
 }): ReactNode => {
     return (
-        <div className="w-full sticky top-0 left-0 flex justify-center bg-accent">
+        <div className="w-full sticky p-3 top-0 left-0 flex justify-center bg-accent border-b-2 border-orange-400">
             <nav className="h-16 flex items-center justify-between container">
-                <h1 className="text-xl font-bold cursor-pointer hover:opacity-80 transition-opacity"><Link href="/dashboard">TanárSegéd</Link></h1>
+                <h1 className="text-xl font-bold  cursor-pointer hover:opacity-80 transition-opacity"><Link href="/dashboard">TanárSegéd</Link></h1>
 
                 <DropdownMenu>
                     <DropdownMenuTrigger className="outline-none">
