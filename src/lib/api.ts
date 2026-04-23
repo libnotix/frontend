@@ -25,7 +25,7 @@ const tokenRefreshMiddleware: Middleware = {
     const { accessToken } = await getAuthCookies();
     if (accessToken) {
       return {
-        ...context,
+        url: context.url,
         init: {
           ...context.init,
           headers: {
@@ -35,6 +35,7 @@ const tokenRefreshMiddleware: Middleware = {
         },
       };
     }
+    return undefined;
   },
   post: async (context: ResponseContext) => {
     const { response, url, init, fetch: fetchApi } = context;

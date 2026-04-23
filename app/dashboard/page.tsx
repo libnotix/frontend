@@ -2,11 +2,16 @@
 
 import { memo, useContext, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import type { LucideIcon } from "lucide-react";
+import {
+  BookOpen,
+  ChevronRight,
+  ClipboardList,
+  Loader2,
+  type LucideIcon,
+} from "lucide-react";
 import { AuthContext } from "@/components/AuthProvider";
 import DashboardLayoutGrid from "@/components/dashboard/DashboardLayoutGrid";
 import { api } from "@/lib/api";
-import { BookOpen, ChevronRight, ClipboardList, Loader2 } from "lucide-react";
 
 interface Draft {
   id: string;
@@ -182,7 +187,9 @@ const DashboardPage = () => {
                 Továbbiak
               </p>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                Ide kerülnek a későbbi modulok.<br/>Stay tuned!
+                Ide kerülnek a későbbi modulok.
+                <br />
+                Stay tuned!
               </p>
             </div>
           </div>
