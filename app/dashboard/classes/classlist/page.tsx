@@ -24,7 +24,7 @@ export default function ClassList() {
   })
 
   const handleDelete = async (id?: number) => {
-    if (!id || !confirm("Tavesz Baxtalo")) return
+    if (!id || !confirm("Biztosan törlöd ezt az osztályt?")) return
 
     try {
       const api = await getServerApi();
@@ -37,7 +37,7 @@ export default function ClassList() {
       alert("Osztály sikeresen törölve.");
     } catch (error) {
       console.error("Hiba a törlés során:", error);
-      alert("Hiba történt a törlés közben. Ellenőrizd a jogosultságokat!");
+      alert("Hiba történt a törlés közben.");
     }
   };
   useEffect(() => {
@@ -84,9 +84,8 @@ export default function ClassList() {
               >
                 <Button
                   variant="destructive"
-                  className="max-w-[100px] absolute right-0.5 mr-2 z-20 bg-white/5 hover:bg-red-500 hover:text-white text-gray-300 border border-white/10 transition-all duration-300" onClick={() => {
-                    handleDelete(cls.id)
-                  }}
+                  className="max-w-[100px] absolute right-0.5 mr-2 z-20 bg-white/5 hover:bg-red-500 hover:text-white text-gray-300 border border-white/10 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                  onClick={() => handleDelete(cls.id)}
                 >
                   Törlés
                 </Button>
