@@ -24,7 +24,7 @@ export default function ClassList() {
   })
 
   const handleDelete = async (id?: number) => {
-    if (!id || !confirm("Tavesz Baxtalo")) return
+    if (!id || !confirm("Biztosan törlöd ezt az osztályt?")) return
 
     try {
       const api = await getServerApi();
@@ -37,7 +37,7 @@ export default function ClassList() {
       alert("Osztály sikeresen törölve.");
     } catch (error) {
       console.error("Hiba a törlés során:", error);
-      alert("Hiba történt a törlés közben. Ellenőrizd a jogosultságokat!");
+      alert("Hiba történt a törlés közben.");
     }
   };
   useEffect(() => {
