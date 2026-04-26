@@ -3,6 +3,6 @@
 import { memo } from "react";
 import { DolgozatEditor } from "../_components/DolgozatEditor";
 
-const DolgozatSzerkesztoIdPage = () => <DolgozatEditor />;
+const DolgozatokIdPage = () => <DolgozatEditor />;
 
-export default memo(DolgozatSzerkesztoIdPage);
+export default memo(DolgozatokIdPage);

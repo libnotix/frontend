@@ -26,7 +26,7 @@ import type { CanvasItem } from "./types";
 import { ExamSaveProvider, useExamSave } from "./examSaveContext";
 import { pickExamTitleFromPayload } from "./savedExamsList";
 
-const LIST_HREF = "/dashboard/dolgozatszerkeszto";
+const LIST_HREF = "/dashboard/dolgozatok";
 const NEW_SEGMENT = "uj";
 
 function DolgozatEditorWorkspace() {

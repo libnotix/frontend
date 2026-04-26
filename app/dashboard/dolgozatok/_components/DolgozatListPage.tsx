@@ -6,10 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronRight, FileText, Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
-import { DashboardAmbientBackdrop } from "@/components/dashboard/DashboardAmbientBackdrop";
 import { parseSavedExamsList, type SavedExamListItem } from "./savedExamsList";
 
-const NEW_EXAM_HREF = "/dashboard/dolgozatszerkeszto/uj";
+const NEW_EXAM_HREF = "/dashboard/dolgozatok/uj";
 
 function formatUpdatedAt(value: string | undefined): string | null {
   if (!value) return null;
@@ -31,7 +30,7 @@ function DolgozatListPageInner() {
   const legacyId = searchParams.get("id");
   useEffect(() => {
     if (legacyId && /^\d+$/.test(legacyId)) {
-      router.replace(`/dashboard/dolgozatszerkeszto/${legacyId}`);
+      router.replace(`/dashboard/dolgozatok/${legacyId}`);
     }
   }, [legacyId, router]);
 
@@ -55,10 +54,8 @@ function DolgozatListPageInner() {
   }, [refresh]);
 
   return (
-    <div className="relative flex min-h-[calc(100vh-4rem)] w-full flex-1 flex-col overflow-x-hidden">
-      <DashboardAmbientBackdrop />
-
-      <div className="relative z-10 flex min-h-0 flex-1 flex-col px-4 pb-10 pt-8 md:px-6 md:pb-12 md:pt-10">
+    <div className="flex min-h-[calc(100vh-4rem)] w-full flex-1 flex-col overflow-x-hidden">
+      <div className="flex min-h-0 flex-1 flex-col px-4 pb-10 pt-8 md:px-6 md:pb-12 md:pt-10">
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -106,7 +103,7 @@ function DolgozatListPageInner() {
                 return (
                   <li key={exam.id} className="min-w-0">
                     <Link
-                      href={`/dashboard/dolgozatszerkeszto/${exam.id}`}
+                      href={`/dashboard/dolgozatok/${exam.id}`}
                       className="ring-foreground/10 bg-card/75 group flex h-full min-h-[7.5rem] flex-col justify-between gap-3 rounded-2xl p-5 ring-1 backdrop-blur-sm transition-shadow duration-200 hover:border-primary/20 hover:shadow-md border border-border/50"
                     >
                       <div className="min-w-0">
