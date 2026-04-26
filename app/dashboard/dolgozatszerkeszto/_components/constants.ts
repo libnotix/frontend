@@ -5,10 +5,14 @@ import { EXAM_TASK_TYPE } from "./examTaskTypes";
 export const CANVAS_SORTABLE_GROUP = "dolgozat-canvas-questions";
 
 export const AVAILABLE_TASK_TYPES: readonly { id: ExamTaskTypeId; text: string }[] = [
-   { id: EXAM_TASK_TYPE.MultipleChoice, text: "Feleletválasztós" },
+   { id: EXAM_TASK_TYPE.Radio, text: "Feleletválasztós (egy helyes)" },
+   { id: EXAM_TASK_TYPE.Checkbox, text: "Feleletválasztós (több helyes)" },
    { id: EXAM_TASK_TYPE.TrueFalse, text: "Igaz/Hamis" },
-   { id: EXAM_TASK_TYPE.ShortAnswer, text: "Rövid válasz" },
    { id: EXAM_TASK_TYPE.Matching, text: "Párosítás" },
+   { id: EXAM_TASK_TYPE.Ordering, text: "Sorbarendezés" },
+   { id: EXAM_TASK_TYPE.Grouping, text: "Csoportosítás" },
+   { id: EXAM_TASK_TYPE.FillInTheBlank, text: "Lyukas szöveg" },
+   { id: EXAM_TASK_TYPE.ShortAnswer, text: "Rövid válasz" },
    { id: EXAM_TASK_TYPE.LongAnswer, text: "Hosszú válasz" },
 ];
 

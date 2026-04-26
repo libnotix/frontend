@@ -1,7 +1,7 @@
 "use client";
 
 type SortableDragHandleProps = {
-   handleRef: (element: Element | null) => void;
+   handleRef: (element: HTMLElement | null) => void;
 };
 
 export function SortableDragHandle({ handleRef }: SortableDragHandleProps) {

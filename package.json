@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "bun x next dev",
+    "dev": "NEXT_PUBLIC_API_URL=https://tanarseged-b.vrolandd.hu bun x next dev",
     "build": "bun x next build",
     "start": "bun x next start",
     "lint": "bun x eslint",
