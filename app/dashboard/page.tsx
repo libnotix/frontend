@@ -20,7 +20,6 @@ interface Draft {
   updatedAt: string;
   createdAt: string;
 }
-
 /** Narrow left-column tiles: icon + chevron row, then title and description */
 function HomeFeatureLink({
   href,
@@ -200,3 +199,4 @@ const DashboardPage = () => {
 };
 
 export default memo(DashboardPage);
+

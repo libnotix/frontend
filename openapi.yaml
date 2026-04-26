@@ -989,6 +989,401 @@ paths:
       responses:
         "200":
           description: Chat history
+  /exams:
+    post:
+      summary: Create exam (dolgozat)
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title: { type: string }
+                description: { type: string, nullable: true }
+                subjectId: { type: integer, nullable: true }
+                schoolClassId: { type: integer, nullable: true }
+                rubric: { type: string, nullable: true }
+      responses:
+        "201":
+          description: Created
+    get:
+      summary: List my exams
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+  /exams/{id}:
+    get:
+      summary: Get exam with questions and linked files
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+    put:
+      summary: Update exam metadata
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                description: { type: string, nullable: true }
+                rubric: { type: string, nullable: true }
+                isPublished: { type: boolean }
+      responses:
+        "200":
+          description: OK
+    delete:
+      summary: Delete exam
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+  /exams/{id}/questions:
+    put:
+      summary: Replace all questions (ordered); cannot remove questions if submissions exist
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [questions]
+              properties:
+                questions:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/ExamQuestionInput"
+      responses:
+        "200":
+          description: OK
+        "409":
+          description: Cannot remove questions when submissions exist
+  /exams/{id}/share:
+    post:
+      summary: Enable share token for public read-only exam
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+    delete:
+      summary: Disable share token
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+  /exams/{id}/submissions:
+    post:
+      summary: Create submission (manual or OCR stub)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [digitizedFrom]
+              properties:
+                digitizedFrom:
+                  type: string
+                  enum: [manual, ocr]
+                studentId: { type: integer, nullable: true }
+                answers:
+                  type: array
+                  items:
+                    type: object
+                    required: [questionId, answer]
+                    properties:
+                      questionId: { type: integer }
+                      answer: {}
+                pageFileIds:
+                  type: array
+                  items: { type: integer }
+                runDigitize: { type: boolean }
+      responses:
+        "201":
+          description: Created
+    get:
+      summary: List submissions for exam
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+  /exam-link/{id}:
+    post:
+      summary: Link file to exam
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fileId]
+              properties:
+                fileId: { type: integer }
+      responses:
+        "200":
+          description: OK
+    get:
+      summary: List linked files
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+    delete:
+      summary: Unlink file
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fileId]
+              properties:
+                fileId: { type: integer }
+      responses:
+        "200":
+          description: OK
+  /exam-chats/{id}:
+    post:
+      summary: Exam AI chat (text reply JSON)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                message: { type: string }
+                fileIds:
+                  type: array
+                  items: { type: integer }
+                idempotencyKey: { type: string }
+                clientTabId: { type: string }
+      responses:
+        "200":
+          description: OK
+    get:
+      summary: Get exam chat history
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+  /submissions/{id}:
+    get:
+      summary: Get submission with answers and question definitions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+    put:
+      summary: Update answers and/or teacher scores
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                answers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      questionId: { type: integer }
+                      answer: {}
+                teacherScores:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      questionId: { type: integer }
+                      teacherScore: { type: integer, nullable: true }
+                      teacherFeedback: { type: string, nullable: true }
+                studentId: { type: integer, nullable: true }
+      responses:
+        "200":
+          description: OK
+    delete:
+      summary: Delete submission
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+  /submissions/{id}/finalize:
+    post:
+      summary: Finalize grading (sum scores)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+  /submissions/{id}/ai-review:
+    post:
+      summary: Run AI / deterministic review
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+  /submissions/{id}/pages:
+    post:
+      summary: Upload scanned pages (multipart, field `file`)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: OK
+  /submissions/{id}/digitize:
+    post:
+      summary: OCR / extract answers from uploaded pages via AI
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+  /public/exams/{token}:
+    get:
+      summary: Public exam (no correctAnswer in questions)
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
 components:
   securitySchemes:
     bearerAuth:
@@ -996,6 +1391,37 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    ExamQuestionType:
+      type: string
+      enum:
+        - radio
+        - checkbox
+        - true_false
+        - matching
+        - ordering
+        - grouping
+        - fill_in_the_blank
+        - short_answer
+        - long_answer
+    ExamQuestionInput:
+      type: object
+      required: [type, order, spec, maxPoints]
+      properties:
+        id:
+          type: integer
+          description: Existing question id for update
+        type:
+          $ref: "#/components/schemas/ExamQuestionType"
+        order:
+          type: integer
+        title: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        spec: {}
+        correctAnswer:
+          description: Null for short_answer / long_answer / fill_in_the_blank
+          nullable: true
+        rubric: { type: string }
+        maxPoints: { type: integer, minimum: 1 }
     ApiResponse:
       type: object
       properties:

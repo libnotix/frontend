@@ -3,14 +3,22 @@
  * Use these in switches, Zod registries, and APIs — not opaque `item-n` slugs.
  */
 export const EXAM_TASK_TYPE = {
-   /** Több válaszlehetőség, egy vagy több helyes (jelenlegi UI: feleletválasztós) */
-   MultipleChoice: "multiple_choice",
+   /** Egyhelyes feleletválasztós */
+   Radio: "radio",
+   /** Többhelyes feleletválasztós */
+   Checkbox: "checkbox",
    /** Igaz / hamis */
    TrueFalse: "true_false",
-   /** Rövid szöveges válasz */
-   ShortAnswer: "short_answer",
    /** Párosítás (kifejezés ↔ válasz) */
    Matching: "matching",
+   /** Sorbarendezés */
+   Ordering: "ordering",
+   /** Csoportosítás */
+   Grouping: "grouping",
+   /** Lyukas szöveg */
+   FillInTheBlank: "fill_in_the_blank",
+   /** Rövid szöveges válasz */
+   ShortAnswer: "short_answer",
    /** Hosszú / esszé jellegű válasz */
    LongAnswer: "long_answer",
 } as const;
