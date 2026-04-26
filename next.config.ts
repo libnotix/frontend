@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  // Added the functionaility to maintain path safety for the DolgozatEditor pages :-)
+  // Path safety: old editor URLs redirect to the dolgozatok routes
   async redirects() {
     return [
       {
