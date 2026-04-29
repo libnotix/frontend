@@ -47,39 +47,6 @@ const ChartIcon = () => (
     </svg>
 );
 
-const ShieldIcon = () => (
-    <svg
-        aria-hidden
-        viewBox="0 0 24 24"
-        className="size-5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
-        <path d="M12 3l8 3v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V6l8-3z" />
-        <path d="M9 12l2 2 4-4" />
-    </svg>
-);
-
-const HandIcon = () => (
-    <svg
-        aria-hidden
-        viewBox="0 0 24 24"
-        className="size-5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
-        <path d="M7 11V6a2 2 0 0 1 4 0v5" />
-        <path d="M11 11V4a2 2 0 0 1 4 0v7" />
-        <path d="M15 11V6a2 2 0 0 1 4 0v8a7 7 0 0 1-7 7h-1a6 6 0 0 1-6-6v-4a2 2 0 0 1 4 0" />
-    </svg>
-);
-
 type Feature = {
     title: string;
     description: string;
@@ -108,28 +75,6 @@ const features: Feature[] = [
         soon: true,
     },
 ];
-
-const Promise = ({
-    title,
-    description,
-    icon,
-}: {
-    title: string;
-    description: string;
-    icon: React.ReactNode;
-}) => (
-    <div className="flex gap-4">
-        <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200">
-            {icon}
-        </div>
-        <div>
-            <h4 className="font-semibold text-slate-900">{title}</h4>
-            <p className="mt-1 text-sm leading-relaxed text-slate-600">
-                {description}
-            </p>
-        </div>
-    </div>
-);
 
 const FeatureShowcase = () => {
     return (
@@ -181,19 +126,6 @@ const FeatureShowcase = () => {
                             </p>
                         </article>
                     ))}
-                </div>
-
-                <div className="mx-auto mt-14 grid max-w-4xl grid-cols-1 gap-4 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm md:grid-cols-2">
-                    <Promise
-                        title="Pszichológiai biztonság"
-                        description="Az AI nem írja felül a tanárt. A hivatalos jegyet minden esetben Ön hagyja jóvá – a szakmai kontroll végig megmarad."
-                        icon={<ShieldIcon />}
-                    />
-                    <Promise
-                        title="Megértő hangvétel"
-                        description="Nem azt mondjuk: „Vegyen meg minket.” Azt mondjuk: „Tudjuk, hogy nehéz. Itt egy eszköz, amivel könnyebb lehet.”"
-                        icon={<HandIcon />}
-                    />
                 </div>
             </div>
         </section>

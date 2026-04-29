@@ -6,9 +6,8 @@ import {
   BookOpen,
   ChevronRight,
   ClipboardList,
+  GraduationCap,
   Loader2,
-  Users,
-  Plus,
   type LucideIcon,
 } from "lucide-react";
 import { AuthContext } from "@/components/AuthProvider";
@@ -138,7 +137,7 @@ const DashboardPage = () => {
             {/* Center 2× — legutóbbi vázlatok */}
             <div className="p-5 md:p-6">
               <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Legutóbb szerkesztve
+                Legutóbb szerkesztett vázlatok
               </p>
               {loading ? (
                 <div className="flex justify-center py-10">
@@ -182,25 +181,15 @@ const DashboardPage = () => {
               )}
             </div>
 
-            {/* Right 1× — reserved */}
-            <div className="flex min-h-32 flex-col bg-card/20 p-5 md:p-6 lg:min-h-0">
-             
-              <div className="mt-4 flex flex-col gap-3">
-                <HomeFeatureLink
-                  href="/dashboard/classes/classlist"
-                  icon={Users}
-                  title="Osztályok"
-                  description="Osztályok megnyitása és kezelése"
-                  iconWrapperClassName="bg-chart-1/15 text-chart-1"
-                />
-                <HomeFeatureLink
-                  href="/dashboard/classes/classcreate"
-                  icon={Plus}
-                  title="Osztály létrehozása"
-                  description="Új osztály hozzáadása pár kattintással"
-                  iconWrapperClassName="bg-primary/10 text-primary"
-                />
-              </div>
+            {/* Right 1× — osztályok */}
+            <div className="flex min-h-0 flex-col bg-card/30 *:flex-1 *:h-full *:justify-center">
+              <HomeFeatureLink
+                href="/dashboard/classes"
+                icon={GraduationCap}
+                title="Osztályok"
+                description="Osztályok létrehozása és diákok névjegyzéke egy helyen"
+                iconWrapperClassName="bg-primary/10 text-primary"
+              />
             </div>
           </div>
         </section>

@@ -20,25 +20,25 @@ function dedupedRefresh(): Promise<string | null> {
   return refreshInFlight;
 }
 
+/** Retry must use plain `fetch`: calling `fetchApi` runs `pre` again, which reads cookies via another server-action round-trip and can still see the *old* access token before Set-Cookie from refresh commits — overwriting the fresh Bearer from refresh. */
 const tokenRefreshMiddleware: Middleware = {
   pre: async (context) => {
     const { accessToken } = await getAuthCookies();
-    if (accessToken) {
-      return {
-        url: context.url,
-        init: {
-          ...context.init,
-          headers: {
-            ...context.init.headers,
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
-      };
+    if (!accessToken) {
+      return undefined;
     }
-    return undefined;
+    const headers = new Headers(context.init.headers ?? undefined);
+    headers.set("Authorization", `Bearer ${accessToken}`);
+    return {
+      url: context.url,
+      init: {
+        ...context.init,
+        headers,
+      },
+    };
   },
   post: async (context: ResponseContext) => {
-    const { response, url, init, fetch: fetchApi } = context;
+    const { response, url, init } = context;
     if (response.status !== 401) {
       return undefined;
     }
@@ -48,16 +48,16 @@ const tokenRefreshMiddleware: Middleware = {
 
     try {
       const newToken = await dedupedRefresh();
-      if (newToken) {
-        const newInit = {
-          ...init,
-          headers: {
-            ...init.headers,
-            Authorization: `Bearer ${newToken}`,
-          },
-        };
-        return fetchApi(url, newInit);
+      if (!newToken) {
+        return undefined;
       }
+      const headers = new Headers(init.headers ?? undefined);
+      headers.set("Authorization", `Bearer ${newToken}`);
+      const retryInit: RequestInit = {
+        ...init,
+        headers,
+      };
+      return fetch(url, retryInit);
     } catch (error) {
       console.error("Token refresh failed:", error);
     }
@@ -78,6 +78,7 @@ export const getServerApi = async () => {
   const config = new Configuration({
     basePath: API_BASE_PATH,
     headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    middleware: [tokenRefreshMiddleware],
   });
 
   return new DefaultApi(config);

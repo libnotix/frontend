@@ -8,7 +8,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { Circle, Square } from "lucide-react";
+import { Circle, Printer, Square } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { ExamQuestionFormSnapshot } from "./examSaveContext";
 import { taskTypeLabel } from "./constants";
 import { fillInBlankUnderlineWidthCh } from "./fillInBlankUnderline";
@@ -573,10 +574,30 @@ export function ExamPreviewPanel({ examTitle, items, getSnapshot, a4PaperPreview
   return (
     <>
       {a4PaperPreview ? (
-        <p className="mx-auto mb-4 max-w-xl text-center text-[11px] font-semibold uppercase tracking-wide text-neutral-400 print:hidden dark:text-neutral-500">
-          A4 előnézet · 210 mm · ~297 mm / lap. A blokkok virtuálisan lapfüzetbe tördelődnek (nem háttér-csík). Nyomtatáskor látszik
-          URL → böngésző nyomtató → fejléc és lábléc kikapcsolva.
-        </p>
+        <div
+          className={cn(
+            "mx-auto mb-4 flex w-[210mm] max-w-[min(210mm,calc(100vw-2rem))] flex-col gap-3 print:hidden",
+          )}
+        >
+          <div className="flex justify-center">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0 border-white/25 bg-primary text-white hover:bg-primary/80 hover:text-white"
+              onClick={() => window.print()}
+              aria-label="Nyomtatás"
+              title="Nyomtatás"
+            >
+              <Printer data-icon="inline-start" />
+              Nyomtatás
+            </Button>
+          </div>
+          <p className="text-center text-[11px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
+            A4 előnézet · 210 mm · ~297 mm / lap. A blokkok virtuálisan lapfüzetbe tördelődnek (nem háttér-csík). Nyomtatáskor látszik
+            URL → böngésző nyomtató → fejléc és lábléc kikapcsolva.
+          </p>
+        </div>
       ) : null}
 
       {!a4PaperPreview ? (

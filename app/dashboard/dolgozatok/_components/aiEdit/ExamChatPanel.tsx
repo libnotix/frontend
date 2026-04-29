@@ -5,7 +5,7 @@ import { Loader2, Send, Sparkles } from "lucide-react";
 import { api } from "@/lib/api";
 import { getAiWebSocketUrl } from "@/lib/aiWebSocket";
 import { getEditorTabId } from "@/lib/editorTabId";
-import { getAuthCookies } from "@/actions/auth";
+import { getAuthCookies, refreshTokenAction } from "@/actions/auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import type { ExamAiEditResponse } from "@/api";
@@ -180,8 +180,27 @@ export function ExamChatPanel({ examId, examUpdatedAt, clientQuestions }: ExamCh
 
       let cancelled = false;
       wsReady.current = false;
+      let reconnectBusy = false;
 
-      void (async () => {
+      async function handleAuthError(failedWs: WebSocket) {
+         if (cancelled || reconnectBusy) return;
+         reconnectBusy = true;
+         try {
+            const refreshed = await refreshTokenAction();
+            if (cancelled) return;
+            if (!refreshed) {
+               failedWs.close();
+               return;
+            }
+            failedWs.close();
+            await openSocket();
+         } finally {
+            reconnectBusy = false;
+         }
+      }
+
+      async function openSocket() {
+         if (cancelled) return;
          const { accessToken } = await getAuthCookies();
          if (!accessToken || cancelled) return;
 
@@ -207,6 +226,7 @@ export function ExamChatPanel({ examId, examUpdatedAt, clientQuestions }: ExamCh
                }
                if (mType === "authError") {
                   wsReady.current = false;
+                  void handleAuthError(ws);
                   return;
                }
 
@@ -276,7 +296,9 @@ export function ExamChatPanel({ examId, examUpdatedAt, clientQuestions }: ExamCh
                inflight.current = null;
             }
          };
-      })();
+      }
+
+      void openSocket();
 
       return () => {
          cancelled = true;

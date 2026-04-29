@@ -682,7 +682,7 @@ export class DefaultApi extends runtime.BaseAPI {
     }
 
     /**
-     * Deletes a school class. Only accessible by admins.
+     * Deletes a school class. Class members (teachers) or admins.
      * Delete a school class
      */
     async classesIdDeleteRaw(requestParameters: ClassesIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ModelApiResponse>> {
@@ -720,7 +720,7 @@ export class DefaultApi extends runtime.BaseAPI {
     }
 
     /**
-     * Deletes a school class. Only accessible by admins.
+     * Deletes a school class. Class members (teachers) or admins.
      * Delete a school class
      */
     async classesIdDelete(requestParameters: ClassesIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ModelApiResponse> {

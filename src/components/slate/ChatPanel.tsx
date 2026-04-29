@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { getAiWebSocketUrl } from "@/lib/aiWebSocket";
 import { getEditorTabId } from "@/lib/editorTabId";
-import { getAuthCookies } from "@/actions/auth";
+import { getAuthCookies, refreshTokenAction } from "@/actions/auth";
 
 import {
   ChatMessage,
@@ -320,8 +320,27 @@ export const ChatPanel = ({
 
     let cancelled = false;
     wsReadyRef.current = false;
+    let reconnectBusy = false;
 
-    (async () => {
+    async function handleAuthError(failedWs: WebSocket) {
+      if (cancelled || reconnectBusy) return;
+      reconnectBusy = true;
+      try {
+        const refreshed = await refreshTokenAction();
+        if (cancelled) return;
+        if (!refreshed) {
+          failedWs.close();
+          return;
+        }
+        failedWs.close();
+        await openSocket();
+      } finally {
+        reconnectBusy = false;
+      }
+    }
+
+    async function openSocket() {
+      if (cancelled) return;
       const { accessToken } = await getAuthCookies();
       if (!accessToken || cancelled) return;
 
@@ -348,6 +367,7 @@ export const ChatPanel = ({
           if (msg.type === "authError") {
             wsReadyRef.current = false;
             console.error("[ChatPanel] WebSocket auth failed");
+            void handleAuthError(ws);
             return;
           }
 
@@ -423,7 +443,9 @@ export const ChatPanel = ({
           inflightRef.current = null;
         }
       };
-    })();
+    }
+
+    void openSocket();
 
     return () => {
       cancelled = true;
