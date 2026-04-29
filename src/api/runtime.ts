@@ -13,7 +13,8 @@
  */
 
 
-export const BASE_PATH = "http://localhost:3000".replace(/\/+$/, "");
+/** Must match dev API (see `src/lib/apiBase.ts`); overridden by `Configuration.basePath`. */
+export const BASE_PATH = "http://localhost:3020".replace(/\/+$/, "");
 
 export interface ConfigurationParameters {
     basePath?: string; // override base path

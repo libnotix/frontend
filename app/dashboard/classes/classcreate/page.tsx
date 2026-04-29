@@ -1,106 +1,156 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
+
 import { getServerApi } from "@/lib/api";
-import z from "zod";
+import { getApiErrorMessage } from "@/lib/api-errors";
+import { createClassSchema, type CreateClassInputs } from "@/lib/schemas";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldDescription,
+} from "@/components/ui/field";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
-const formSchema = z.object({
-  className: z.string().min(1, "Kötelező mező"),
-  classNumber: z.number().min(1, "Kötelező mező"),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
-export default function CreateClass() {
+export default function CreateClassPage() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { className: "", classNumber: "" as any },
+  } = useForm<CreateClassInputs>({
+    resolver: zodResolver(createClassSchema),
+    defaultValues: {
+      className: "",
+      classNumber: undefined as unknown as number,
+    },
   });
 
-  const onSubmit = async (values: FormValues) => {
-    setIsLoading(true);
+  const onSubmit = async (values: CreateClassInputs) => {
+    setSubmitting(true);
     try {
       const api = await getServerApi();
-
       await api.classesPost({
         createClassRequest: {
           name: values.className,
           classNumber: values.classNumber,
         },
       });
-
-      router.push("/dashboard/classes/classlist");
+      toast.success("Az osztály létrejött.");
+      router.push("/dashboard/classes");
       router.refresh();
-    } catch (error: any) {
-      console.error(
-        "kurva anyád",
-        error,
-      );
-      alert(error);
+    } catch (error) {
+      console.error("Create class failed", error);
+      toast.error(await getApiErrorMessage(error, "Nem sikerült létrehozni az osztályt."));
     } finally {
-      setIsLoading(false);
+      setSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-white p-6">
-      <main className="flex-1 flex justify-center items-center">
-        <div className="w-full max-w-md bg-[#0a0a0a] border border-[#262626] p-8 rounded-lg">
-          <h1 className="text-xl font-bold mb-6 text-center">
-            Osztály létrehozása
-          </h1>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-[11px] text-gray-400 uppercase">
-                Osztály neve
-              </label>
-              <input
-                {...register("className")}
-                className="w-full bg-[#111] border  border-[#262626] p-3 text-sm focus:border-orange outline-none"
-                placeholder="Pl. 10.B"
-                disabled={isLoading}
-              />
-              {errors.className && (
-                <p className="text-red-500 text-[10px]">
-                  {errors.className.message}
-                </p>
-              )}
-              <label className="text-[11px] text-gray-400 uppercase">
-                Évfolyam
-              </label>
-              <input
-                type="number"
-                {...register("classNumber", { valueAsNumber: true })}
-                className="w-full bg-[#111] border  border-[#262626] p-3 text-sm focus:border-orange outline-none"
-                placeholder="Pl. 10"
-                disabled={isLoading}
-              />
-              {errors.classNumber && (
-                <p className="text-red-500 text-[10px]">
-                  {errors.classNumber.message}
-                </p>
-              )}
-            </div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-orange-400 text-black py-3 text-sm font-bold hover:opacity-80 cursor-pointer disabled:opacity-50"
-            >
-              {isLoading ? "Létrehozás..." : "LÉTREHOZÁS"}
-            </button>
-          </form>
-        </div>
-      </main>
+    <div className="min-h-full bg-background p-4 sm:p-6">
+      <div className="mx-auto flex w-full max-w-lg flex-col gap-6">
+        <Button variant="ghost" size="sm" className="w-fit gap-2 rounded-full px-0 text-muted-foreground" asChild>
+          <Link href="/dashboard/classes">
+            <ArrowLeft className="size-4" />
+            Vissza az osztályokhoz
+          </Link>
+        </Button>
+
+        <Card className="border border-border shadow-sm">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-xl">Új osztály</CardTitle>
+            <CardDescription>
+              Add meg a megjelenített nevet és az évfolyamot. Később bármikor módosíthatod a részleteket.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
+              <FieldGroup>
+                <Field data-invalid={!!errors.className}>
+                  <FieldLabel htmlFor="className">Osztály neve</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="className"
+                      autoComplete="off"
+                      placeholder="Pl. 10.B"
+                      disabled={submitting}
+                      aria-invalid={!!errors.className}
+                      {...register("className")}
+                    />
+                    <FieldError errors={[errors.className]} />
+                  </FieldContent>
+                </Field>
+
+                <Field data-invalid={!!errors.classNumber}>
+                  <FieldLabel htmlFor="classNumber">Évfolyam</FieldLabel>
+                  <FieldDescription>1-től 20-ig (pl. tizedik évfolyam: 10).</FieldDescription>
+                  <FieldContent>
+                    <Controller
+                      name="classNumber"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          id="classNumber"
+                          type="number"
+                          inputMode="numeric"
+                          min={1}
+                          max={20}
+                          placeholder="Pl. 10"
+                          disabled={submitting}
+                          aria-invalid={!!errors.classNumber}
+                          value={field.value === undefined || Number.isNaN(field.value) ? "" : field.value}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            if (v === "") {
+                              field.onChange(undefined);
+                              return;
+                            }
+                            const n = Number(v);
+                            field.onChange(Number.isNaN(n) ? undefined : n);
+                          }}
+                          onBlur={field.onBlur}
+                        />
+                      )}
+                    />
+                    <FieldError errors={[errors.classNumber]} />
+                  </FieldContent>
+                </Field>
+              </FieldGroup>
+
+              <Button
+                type="submit"
+                disabled={submitting}
+                className="w-full rounded-full"
+              >
+                {submitting ? (
+                  <span className="inline-flex items-center gap-2">
+                    <LoadingSpinner className="size-4" />
+                    Létrehozás…
+                  </span>
+                ) : (
+                  "Osztály létrehozása"
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

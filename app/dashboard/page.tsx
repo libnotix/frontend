@@ -6,6 +6,7 @@ import {
   BookOpen,
   ChevronRight,
   ClipboardList,
+  GraduationCap,
   Loader2,
   type LucideIcon,
 } from "lucide-react";
@@ -136,7 +137,7 @@ const DashboardPage = () => {
             {/* Center 2× — legutóbbi vázlatok */}
             <div className="p-5 md:p-6">
               <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Legutóbb szerkesztve
+                Legutóbb szerkesztett vázlatok
               </p>
               {loading ? (
                 <div className="flex justify-center py-10">
@@ -180,16 +181,15 @@ const DashboardPage = () => {
               )}
             </div>
 
-            {/* Right 1× — reserved */}
-            <div className="flex min-h-32 flex-col justify-center bg-card/20 p-5 md:p-6 lg:min-h-0">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Továbbiak
-              </p>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                Ide kerülnek a későbbi modulok.
-                <br />
-                Stay tuned!
-              </p>
+            {/* Right 1× — osztályok */}
+            <div className="flex min-h-0 flex-col bg-card/30 *:flex-1 *:h-full *:justify-center">
+              <HomeFeatureLink
+                href="/dashboard/classes"
+                icon={GraduationCap}
+                title="Osztályok"
+                description="Osztályok létrehozása és diákok névjegyzéke egy helyen"
+                iconWrapperClassName="bg-primary/10 text-primary"
+              />
             </div>
           </div>
         </section>

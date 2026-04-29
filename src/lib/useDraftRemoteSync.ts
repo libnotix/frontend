@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { getAuthCookies } from "@/actions/auth";
+import { getAuthCookies, refreshTokenAction } from "@/actions/auth";
 import { getAiWebSocketUrl } from "./aiWebSocket";
 
 export type DraftRemoteSyncMessage = {
@@ -34,20 +34,40 @@ export function useDraftRemoteSync(
     if (!draftId || !collabTabId) return;
 
     let cancelled = false;
+    let reconnectBusy = false;
     let ws: WebSocket | null = null;
 
-    void (async () => {
+    async function handleAuthError(failedWs: WebSocket) {
+      if (cancelled || reconnectBusy) return;
+      reconnectBusy = true;
+      try {
+        const refreshed = await refreshTokenAction();
+        if (cancelled) return;
+        if (!refreshed) {
+          failedWs.close();
+          return;
+        }
+        failedWs.close();
+        await openSocket();
+      } finally {
+        reconnectBusy = false;
+      }
+    }
+
+    async function openSocket() {
+      if (cancelled) return;
       const { accessToken } = await getAuthCookies();
       if (!accessToken || cancelled) return;
 
-      ws = new WebSocket(getAiWebSocketUrl());
+      const socket = new WebSocket(getAiWebSocketUrl());
+      ws = socket;
 
-      ws.onmessage = (ev) => {
+      socket.onmessage = (ev) => {
         try {
           const msg = JSON.parse(ev.data as string) as Record<string, unknown>;
           if (msg.v !== 1) return;
           if (msg.type === "authOk") {
-            ws?.send(
+            socket.send(
               JSON.stringify({
                 v: 1,
                 type: "subscribeDraft",
@@ -57,6 +77,10 @@ export function useDraftRemoteSync(
             return;
           }
           if (msg.type === "subscribeDraftOk") return;
+          if (msg.type === "authError") {
+            void handleAuthError(socket);
+            return;
+          }
           if (msg.type === "draftRemoteSync") {
             onRemoteRef.current(msg as unknown as DraftRemoteSyncMessage);
           }
@@ -65,10 +89,12 @@ export function useDraftRemoteSync(
         }
       };
 
-      ws.onopen = () => {
-        ws?.send(JSON.stringify({ v: 1, type: "auth", token: accessToken }));
+      socket.onopen = () => {
+        socket.send(JSON.stringify({ v: 1, type: "auth", token: accessToken }));
       };
-    })();
+    }
+
+    void openSocket();
 
     return () => {
       cancelled = true;

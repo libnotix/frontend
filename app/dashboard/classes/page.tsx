@@ -1,162 +1,214 @@
 "use client";
 
-import { memo } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { registerSchema, RegisterInputs } from "@/lib/schemas";
-import { useRegister } from "@/hooks/useAuth";
+import Link from "next/link";
+import { GraduationCap, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { AuthLayout } from "@/components/auth/AuthLayout";
-import { HugeiconsIcon } from "@hugeicons/react";
+
+import { getServerApi } from "@/lib/api";
+import { getApiErrorMessage } from "@/lib/api-errors";
+import type { SchoolClass } from "@/api";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  UserCircleIcon,
-  Mail01Icon,
-  UserAccountIcon,
-  Tick01Icon
-} from "@hugeicons/core-free-icons";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
-const CreateAccount = () => {
+export default function ClassListPage() {
   const router = useRouter();
-  const registerMutation = useRegister();
+  const [classes, setClasses] = useState<SchoolClass[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<RegisterInputs>({
-    resolver: zodResolver(registerSchema),
-  });
+  useEffect(() => {
+    let cancelled = false;
 
-  const onSubmit: SubmitHandler<RegisterInputs> = async (data) => {
+    void (async () => {
+      try {
+        const api = await getServerApi();
+        const response = await api.classesGet();
+        if (!cancelled) setClasses(response.classes ?? []);
+      } catch (error: unknown) {
+        console.error("Failed to fetch classes:", error);
+        if (
+          error &&
+          typeof error === "object" &&
+          "response" in error &&
+          (error as { response?: { status?: number } }).response?.status === 401
+        ) {
+          router.push("/auth/login");
+          return;
+        }
+        toast.error(await getApiErrorMessage(error, "Nem sikerült betölteni az osztályokat."));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
+
+  const classToDelete = deleteId != null ? classes.find((c) => c.id === deleteId) : undefined;
+
+  const confirmDelete = async () => {
+    if (deleteId == null) return;
+    setDeleting(true);
     try {
-      await registerMutation.mutateAsync(data);
-      toast.success("Sikeres regisztráció!");
-      router.push("/auth/login"); // Redirect to login after successful registration
-    } catch (err) {
-      console.error(err);
-      toast.error("Hiba történt a regisztráció közben.");
+      const api = await getServerApi();
+      await api.classesIdDelete({ id: deleteId });
+      setClasses((prev) => prev.filter((c) => c.id !== deleteId));
+      toast.success("Az osztályt töröltük.");
+      setDeleteId(null);
+    } catch (error) {
+      console.error("Delete class failed:", error);
+      toast.error(await getApiErrorMessage(error, "Nem sikerült törölni az osztályt."));
+    } finally {
+      setDeleting(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 p-6 text-muted-foreground">
+        <LoadingSpinner className="size-8 text-primary" />
+        <p className="text-sm">Osztályok betöltése…</p>
+      </div>
+    );
+  }
+
   return (
-    <AuthLayout
-      title="Regisztráció"
-      description="Hozz létre egy új fiókot!"
-      showBack
-    >
-      <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
-        <CardContent className="pt-6">
-          <form onSubmit={handleSubmit(onSubmit)} autoComplete="off" className="space-y-4 animate-fade-in">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Vezetéknév</Label>
-                <div className="relative">
-                  <Input
-                    placeholder="Minta"
-                    className="pl-10"
-                    {...register("lastName")}
-                  />
-                  <div className="absolute left-3 top-2.5 text-muted-foreground">
-                    <HugeiconsIcon icon={UserCircleIcon} size={18} />
-                  </div>
-                </div>
-                {errors.lastName && (
-                  <p className="text-xs text-red-500 font-medium animate-pulse">
-                    {errors.lastName.message}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label>Keresztnév</Label>
-                <div className="relative">
-                  <Input
-                    placeholder="János"
-                    className="pl-10"
-                    {...register("firstName")}
-                  />
-                  <div className="absolute left-3 top-2.5 text-muted-foreground">
-                    <HugeiconsIcon icon={UserCircleIcon} size={18} />
-                  </div>
-                </div>
-                {errors.firstName && (
-                  <p className="text-xs text-red-500 font-medium animate-pulse">
-                    {errors.firstName.message}
-                  </p>
-                )}
-              </div>
+    <div className="min-h-full bg-background p-4 sm:p-6">
+      <div className="mx-auto max-w-7xl space-y-8">
+        <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+              <GraduationCap className="size-6" aria-hidden />
             </div>
-
-            <div className="space-y-2">
-              <Label>Email</Label>
-              <div className="relative">
-                <Input
-                  type="email"
-                  placeholder="minta@gmail.com"
-                  className="pl-10"
-                  {...register("email")}
-                />
-                <div className="absolute left-3 top-2.5 text-muted-foreground">
-                  <HugeiconsIcon icon={Mail01Icon} size={18} />
-                </div>
-              </div>
-              {errors.email && (
-                <p className="text-xs text-red-500 font-medium animate-pulse">
-                  {errors.email.message}
-                </p>
-              )}
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">Osztályaim</h1>
+              <p className="text-sm text-muted-foreground">
+                Hozz létre osztályokat, és kezeld a diákokat egy helyen.
+              </p>
             </div>
-
-            <div className="space-y-2">
-              <Label>Felhasználónév</Label>
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="MintaJanos"
-                  className="pl-10"
-                  {...register("username")}
-                />
-                <div className="absolute left-3 top-2.5 text-muted-foreground">
-                  <HugeiconsIcon icon={UserAccountIcon} size={18} />
-                </div>
-              </div>
-              {errors.username && (
-                <p className="text-xs text-red-500 font-medium animate-pulse">
-                  {errors.username.message}
-                </p>
-              )}
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full bg-primary hover:bg-primary/90 transition-all duration-300 mt-6"
-              disabled={registerMutation.isPending}
-            >
-              {registerMutation.isPending ? <LoadingSpinner /> : (
-                <span className="flex items-center gap-2">
-                  Regisztráció <HugeiconsIcon icon={Tick01Icon} size={16} />
-                </span>
-              )}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="justify-center pb-6">
-          <p className="text-sm text-muted-foreground">
-            Már van fiókod?{" "}
-            <Link href="/auth/login" className="text-primary hover:underline font-medium transition-colors">
-              Bejelentkezés
+          </div>
+          <Button asChild className="shrink-0 rounded-full">
+            <Link href="/dashboard/classes/classcreate">
+              <Plus className="mr-2 size-4" />
+              Új osztály
             </Link>
-          </p>
-        </CardFooter>
-      </Card>
-    </AuthLayout>
-  );
-};
+          </Button>
+        </header>
 
-export default memo(CreateAccount);
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {classes.length > 0 ? (
+            classes.map((cls) => (
+              <Card
+                key={cls.id}
+                size="sm"
+                className="group gap-0 overflow-hidden border border-border bg-card/40 py-0 shadow-sm transition-colors hover:border-primary/40"
+              >
+                <CardContent className="flex flex-col gap-2 p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <h2 className="text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
+                        {cls.name}
+                      </h2>
+                      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                        {cls.classNumber != null ? `${cls.classNumber}. évfolyam` : "Évfolyam nincs megadva"}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      className="shrink-0 rounded-full text-muted-foreground hover:bg-destructive/15 hover:text-destructive"
+                      onClick={() => cls.id != null && setDeleteId(cls.id)}
+                      aria-label={`Osztály törlése: ${cls.name}`}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="w-full rounded-full border border-border bg-background/80 hover:bg-primary/10 hover:text-foreground"
+                    onClick={() => cls.id != null && router.push(`/dashboard/classes/${cls.id}`)}
+                  >
+                    Megnyitás
+                  </Button>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <div className="col-span-full flex flex-col items-center justify-center rounded-3xl border border-dashed border-primary/40 bg-muted/20 px-8 py-16 text-center">
+              <GraduationCap className="mb-3 size-12 text-muted-foreground" aria-hidden />
+              <p className="text-lg font-medium text-foreground">Még nincs osztályod</p>
+              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                Hozz létre egy osztályt, és add hozzá a diákokat az osztály nézetben.
+              </p>
+              <Button asChild className="mt-6 rounded-full">
+                <Link href="/dashboard/classes/classcreate">Első osztály létrehozása</Link>
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {classes.length > 0 && (
+          <Link
+            href="/dashboard/classes/classcreate"
+            className="block rounded-3xl border border-dashed border-primary/50 bg-muted/10 p-8 text-center transition-colors hover:border-primary hover:bg-muted/30"
+          >
+            <span className="inline-flex items-center justify-center gap-2 text-sm font-medium text-foreground">
+              <Plus className="size-4 text-primary" />
+              Új osztály létrehozása
+            </span>
+          </Link>
+        )}
+      </div>
+
+      <AlertDialog open={deleteId != null} onOpenChange={(open) => !open && !deleting && setDeleteId(null)}>
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Biztosan törlöd ezt az osztályt?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {classToDelete?.name ? (
+                <>
+                  Az <strong className="text-foreground">{classToDelete.name}</strong> osztály és a hozzá tartozó
+                  kapcsolatok eltávolításra kerülnek.{" "}
+                  {"Ez a művelet nem vonható vissza."}
+                </>
+              ) : (
+                "Ez a művelet nem vonható vissza."
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Mégse</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={(e) => {
+                e.preventDefault();
+                void confirmDelete();
+              }}
+              disabled={deleting}
+            >
+              {deleting ? "Törlés…" : "Törlés"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
