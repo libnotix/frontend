@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { DashboardAmbientBackdrop } from "@/components/dashboard/DashboardAmbientBackdrop";
 import { api } from "@/lib/api";
 import type { ExamQuestionEdit, ExamQuestionInput } from "@/api";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortableOperation } from "@dnd-kit/react/sortable";
 import { LayoutList, MessageSquareText, Plus } from "lucide-react";
@@ -276,6 +276,17 @@ function useDebouncedCallback<T extends (...args: never[]) => void>(
 
 function DolgozatEditorWorkspace() {
   const router = useRouter();
+  const pathname = usePathname();
+  const pathnameRef = useRef(pathname);
+  pathnameRef.current = pathname;
+  const editorSessionActiveRef = useRef(true);
+  useEffect(() => {
+    editorSessionActiveRef.current = true;
+    return () => {
+      editorSessionActiveRef.current = false;
+    };
+  }, []);
+
   const params = useParams<{ id: string }>();
   const idParam = typeof params?.id === "string" ? params.id : "";
   const isNewRoute = idParam === NEW_SEGMENT;
@@ -434,6 +445,7 @@ function DolgozatEditorWorkspace() {
 
     isSavingRef.current = true;
     needsSaveRef.current = false;
+    const routeAtSaveStart = pathnameRef.current;
     setIsSaving(true);
     setIsSaveError(false);
     setSaveStatusMessage("Mentés folyamatban...");
@@ -448,7 +460,9 @@ function DolgozatEditorWorkspace() {
         if (!createdId) {
           throw new Error("A backend nem adott vissza dolgozat azonosítót.");
         }
-        setExamId(createdId);
+        if (editorSessionActiveRef.current) {
+          setExamId(createdId);
+        }
         resolvedExamId = createdId;
       } else {
         await api.examsIdPutRaw({ id: resolvedExamId, examsIdPutRequest: { title } });
@@ -459,6 +473,12 @@ function DolgozatEditorWorkspace() {
         examsIdQuestionsPutRequest: { questions: toQuestionPayload() },
       });
 
+      const stillHere =
+        editorSessionActiveRef.current && pathnameRef.current === routeAtSaveStart;
+      if (!stillHere) {
+        return;
+      }
+
       const savedAt = new Date();
       setLastSaved(savedAt);
       setExamUpdatedAt(savedAt.toISOString());
@@ -466,15 +486,22 @@ function DolgozatEditorWorkspace() {
       router.replace(`${LIST_HREF}/${resolvedExamId}`);
     } catch (error) {
       console.error("Exam save failed:", error);
-      setIsSaveError(true);
-      setSaveStatusMessage("A mentés nem sikerült. Próbáld újra.");
+      if (editorSessionActiveRef.current && pathnameRef.current === routeAtSaveStart) {
+        setIsSaveError(true);
+        setSaveStatusMessage("A mentés nem sikerült. Próbáld újra.");
+      }
     } finally {
       isSavingRef.current = false;
-      setIsSaving(false);
+      if (editorSessionActiveRef.current) {
+        setIsSaving(false);
+      }
+      const stillOnSaveRoute =
+        editorSessionActiveRef.current && pathnameRef.current === routeAtSaveStart;
       if (needsSaveRef.current) {
         needsSaveRef.current = false;
-        // Read latest closure via ref so we don't recurse into our own stale binding.
-        void saveExamRef.current?.();
+        if (stillOnSaveRoute) {
+          void saveExamRef.current?.();
+        }
       }
     }
   }, [examId, invalidQuestionIds.length, isValidRoute, metaForm, router, toQuestionPayload]);
@@ -540,10 +567,16 @@ function DolgozatEditorWorkspace() {
 
   const deleteExam = async () => {
     if (!examId) return;
+    const routeAtDeleteStart = pathnameRef.current;
     setIsSaving(true);
     setSaveStatusMessage("Dolgozat törlése...");
     try {
       await api.examsIdDeleteRaw({ id: examId });
+      const stillHere =
+        editorSessionActiveRef.current && pathnameRef.current === routeAtDeleteStart;
+      if (!stillHere) {
+        return;
+      }
       setExamId(null);
       setLeftItems([]);
       metaForm.reset({ title: "" });
@@ -551,9 +584,13 @@ function DolgozatEditorWorkspace() {
       router.push(LIST_HREF);
     } catch (error) {
       console.error("Exam delete failed:", error);
-      setSaveStatusMessage("A törlés nem sikerült.");
+      if (editorSessionActiveRef.current && pathnameRef.current === routeAtDeleteStart) {
+        setSaveStatusMessage("A törlés nem sikerült.");
+      }
     } finally {
-      setIsSaving(false);
+      if (editorSessionActiveRef.current) {
+        setIsSaving(false);
+      }
     }
   };
 

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft } from "lucide-react";
@@ -26,6 +26,17 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function CreateClassPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const pathnameRef = useRef(pathname);
+  pathnameRef.current = pathname;
+  const pageActiveRef = useRef(true);
+  useEffect(() => {
+    pageActiveRef.current = true;
+    return () => {
+      pageActiveRef.current = false;
+    };
+  }, []);
+
   const [submitting, setSubmitting] = useState(false);
 
   const {
@@ -42,6 +53,7 @@ export default function CreateClassPage() {
   });
 
   const onSubmit = async (values: CreateClassInputs) => {
+    const routeAtStart = pathnameRef.current;
     setSubmitting(true);
     try {
       const api = await getServerApi();
@@ -51,14 +63,20 @@ export default function CreateClassPage() {
           classNumber: values.classNumber,
         },
       });
-      toast.success("Az osztály létrejött.");
-      router.push("/dashboard/classes");
-      router.refresh();
+      if (pageActiveRef.current && pathnameRef.current === routeAtStart) {
+        toast.success("Az osztály létrejött.");
+        router.push("/dashboard/classes");
+        router.refresh();
+      }
     } catch (error) {
       console.error("Create class failed", error);
-      toast.error(await getApiErrorMessage(error, "Nem sikerült létrehozni az osztályt."));
+      if (pageActiveRef.current && pathnameRef.current === routeAtStart) {
+        toast.error(await getApiErrorMessage(error, "Nem sikerült létrehozni az osztályt."));
+      }
     } finally {
-      setSubmitting(false);
+      if (pageActiveRef.current) {
+        setSubmitting(false);
+      }
     }
   };
 

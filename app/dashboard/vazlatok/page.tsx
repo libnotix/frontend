@@ -1,7 +1,7 @@
 "use client";
 
-import { memo, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { memo, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { Plus, Edit2, Trash2, FileText, Loader2, BookOpen } from "lucide-react";
 import { CreateDraftRequestFormatEnum } from "@/api";
@@ -19,6 +19,16 @@ const VazlatokPage = () => {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+  const pathnameRef = useRef(pathname);
+  pathnameRef.current = pathname;
+  const pageActiveRef = useRef(true);
+  useEffect(() => {
+    pageActiveRef.current = true;
+    return () => {
+      pageActiveRef.current = false;
+    };
+  }, []);
 
   const fetchDrafts = async () => {
     try {
@@ -41,6 +51,7 @@ const VazlatokPage = () => {
   }, []);
 
   const handleCreateDraft = async () => {
+    const routeAtStart = pathnameRef.current;
     try {
       setCreating(true);
       const res = await api.draftsPostRaw({
@@ -62,12 +73,16 @@ const VazlatokPage = () => {
       const resJson = await res.raw.json();
       const newDraft = resJson?.draft || resJson;
       if (newDraft && newDraft.id) {
-        router.push(`/dashboard/vazlatok/${newDraft.id}`);
+        if (pageActiveRef.current && pathnameRef.current === routeAtStart) {
+          router.push(`/dashboard/vazlatok/${newDraft.id}`);
+        }
       }
     } catch (error) {
       console.error("Failed to create draft", error);
     } finally {
-      setCreating(false);
+      if (pageActiveRef.current) {
+        setCreating(false);
+      }
     }
   };
 
