@@ -97,7 +97,7 @@ export default function ClassWomb() {
     <div className="p-10 text-white">
       <div className="flex flex-1 justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight border-2 border p-1 rounded-[10px] solid border-orange-500 ">
+          <h1 className="text-3xl font-bold tracking-tight border-2 p-1 rounded-[10px] solid border-primary ">
             {classData?._class?.name || "Valami nem jo"}
           </h1>
         </div>
@@ -106,7 +106,7 @@ export default function ClassWomb() {
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button
-                className="bg-orange-500 hover:bg-orange-600 text-black font-bold"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
                 variant="outline"
                 onClick={() => setIsDialogOpen(true)}
               >
@@ -154,7 +154,7 @@ export default function ClassWomb() {
                   <DialogClose asChild>
                     <Button variant="outline" type="button">Mégsem</Button>
                   </DialogClose>
-                  <Button type="submit" disabled={isSubmitting} className="bg-orange-500 hover:bg-orange-600 text-black">
+                  <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                     {isSubmitting ? "Mentés..." : "Mentés"}
                   </Button>
                 </DialogFooter>
@@ -162,7 +162,7 @@ export default function ClassWomb() {
             </DialogContent>
           </Dialog>
           <div className="ml-2">
-            <Button asChild className="cursor-pointer bg-orange-500 hover:bg-orange-600 text-black font-bold">
+            <Button asChild className="cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
               <label htmlFor="picture">
                 Névsor feltöltése
               </label>
@@ -179,7 +179,7 @@ export default function ClassWomb() {
             <Card key={student.id} className="border-none shadow-lg bg-card/50 backdrop-blur-sm hover:bg-card/70 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-full bg-orange-500/10 text-orange-500">
+                  <div className="p-3 rounded-full bg-primary/10 text-primary">
                     <HugeiconsIcon icon={UserCircleIcon} size={24} />
                   </div>
                   <div className="flex-1 min-w-0">

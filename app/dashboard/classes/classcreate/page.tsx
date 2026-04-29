@@ -66,7 +66,7 @@ export default function CreateClass() {
               </label>
               <input
                 {...register("className")}
-                className="w-full bg-[#111] border  border-[#262626] p-3 text-sm focus:border-orange outline-none"
+                className="w-full bg-[#111] border border-[#262626] p-3 text-sm focus:border-primary outline-none"
                 placeholder="Pl. 10.B"
                 disabled={isLoading}
               />
@@ -81,7 +81,7 @@ export default function CreateClass() {
               <input
                 type="number"
                 {...register("classNumber", { valueAsNumber: true })}
-                className="w-full bg-[#111] border  border-[#262626] p-3 text-sm focus:border-orange outline-none"
+                className="w-full bg-[#111] border border-[#262626] p-3 text-sm focus:border-primary outline-none"
                 placeholder="Pl. 10"
                 disabled={isLoading}
               />
@@ -94,7 +94,7 @@ export default function CreateClass() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-orange-400 text-black py-3 text-sm font-bold hover:opacity-80 cursor-pointer disabled:opacity-50"
+              className="w-full bg-primary text-primary-foreground py-3 text-sm font-bold hover:bg-primary/90 cursor-pointer disabled:opacity-50 transition-colors"
             >
               {isLoading ? "Létrehozás..." : "LÉTREHOZÁS"}
             </button>

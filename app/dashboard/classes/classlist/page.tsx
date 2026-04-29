@@ -11,7 +11,7 @@ import { getServerApi } from "@/lib/api"
 
 import type { SchoolClass } from "@/api"
 
-type FormValues = {
+type FormValues = { 
   classes: SchoolClass[]
 }
 
@@ -80,7 +80,7 @@ export default function ClassList() {
             classes.map((cls) => (
               <Card
                 key={cls.id}
-                className="group relative border border-[#262626] bg-gradient-to-b from-[#111111] to-[#0a0a0a] shadow-lg rounded-2xl overflow-hidden hover:border-orange-500/50 hover:shadow-orange-500/10 transition-all duration-300"
+                className="group relative border border-[#262626] bg-linear-to-b from-[#111111] to-[#0a0a0a] shadow-lg rounded-2xl overflow-hidden hover:border-primary/50 hover:shadow-primary/10 transition-all duration-300"
               >
                 <Button
                   variant="destructive"
@@ -89,17 +89,17 @@ export default function ClassList() {
                 >
                   Törlés
                 </Button>
-                <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/5 to-orange-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-linear-to-r from-primary/0 via-primary/5 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <CardContent className="p-6 flex flex-col justify-between h-full space-y-6 relative z-10">
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                      <h3 className="text-xl font-bold text-white tracking-tight group-hover:text-orange-400 transition-colors">{cls.name}</h3>
+                      <h3 className="text-xl font-bold text-white tracking-tight group-hover:text-primary transition-colors">{cls.name}</h3>
                       <p className="text-xs text-gray-500 uppercase tracking-wider font-medium">Osztály {cls.classNumber ? `(${cls.classNumber}. évf.)` : ''}</p>
                     </div>
                   </div>
                   <Button
                     variant="secondary"
-                    className="w-full bg-white/5 hover:bg-orange-500 hover:text-white text-gray-300 border border-white/10 transition-all duration-300 rounded-xl"
+                    className="w-full bg-white/5 hover:bg-primary hover:text-primary-foreground text-gray-300 border border-white/10 transition-all duration-300 rounded-xl"
                     onClick={() => router.push(`/dashboard/classes/${cls.id}`)}
                   >
                     Megnyitás
@@ -108,7 +108,7 @@ export default function ClassList() {
               </Card>
             ))
           ) : (
-            <div className="col-span-full flex flex-col items-center justify-center p-12 border-2  border-orange-400 rounded-2xl bg-[#0a0a0a]/50">
+            <div className="col-span-full flex flex-col items-center justify-center p-12 border-2 border-primary rounded-2xl bg-[#0a0a0a]/50">
               <div className="text-gray-500 text-lg mb-2 font-medium">Nincs még osztályod</div>
               <p className="text-gray-600 text-sm">Hozz létre egyet az alábbi gombbal kezdésként.</p>
             </div>
@@ -116,7 +116,7 @@ export default function ClassList() {
         </div>
 
         <Link href="/dashboard/classes/classcreate">
-          <Card className="mt-6 cursor-pointer  border-2 border-orange-400 bg-transparent flex items-center justify-center py-8 hover:bg-white/5 hover:border-white transition-all">
+          <Card className="mt-6 cursor-pointer border-2 border-primary bg-transparent flex items-center justify-center py-8 hover:bg-white/5 hover:border-white transition-all">
             <span className="text-sm font-medium text-white">+ Új osztály létrehozása</span>
           </Card>
         </Link>
