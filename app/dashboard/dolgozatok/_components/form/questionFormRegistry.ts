@@ -86,6 +86,7 @@ export function getQuestionFormConfig(typeId: ExamTaskTypeId): QuestionFormConfi
                description: "",
                points: 5,
                rubric: "",
+               answerLineCount: 5,
             },
          };
 
@@ -124,7 +125,10 @@ export function getQuestionFormConfig(typeId: ExamTaskTypeId): QuestionFormConfi
                description: "",
                points: 5,
                groups: [{ value: "A csoport" }, { value: "B csoport" }],
-               items: [{ value: "Első elem" }, { value: "Második elem" }],
+               items: [
+                  { value: "Első elem", correctGroupIndex: 0 },
+                  { value: "Második elem", correctGroupIndex: 1 },
+               ],
             },
          };
 
@@ -135,8 +139,7 @@ export function getQuestionFormConfig(typeId: ExamTaskTypeId): QuestionFormConfi
                title: "",
                description: "",
                points: 5,
-               leadText: "",
-               blanks: [{ text: "", acceptedAnswers: [""] }],
+               blanks: [{ text: "", afterText: "", acceptedAnswers: [""] }],
             },
          };
 
@@ -148,6 +151,7 @@ export function getQuestionFormConfig(typeId: ExamTaskTypeId): QuestionFormConfi
                description: "",
                points: 5,
                rubric: "",
+               answerLineCount: 18,
             },
          };
    }

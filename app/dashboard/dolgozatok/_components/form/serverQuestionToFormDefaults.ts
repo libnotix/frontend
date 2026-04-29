@@ -1,5 +1,6 @@
 import type { ExamTaskTypeId } from "../examTaskTypes";
 import { EXAM_TASK_TYPE } from "../examTaskTypes";
+import { parseFillInBlankSegments } from "./fillInBlankSegments";
 
 function asRecord(value: unknown): Record<string, unknown> | null {
    if (value && typeof value === "object") return value as Record<string, unknown>;
@@ -173,67 +174,98 @@ export function serverQuestionToFormDefaults(typeId: ExamTaskTypeId, raw: unknow
          const spec = asRecord(q.spec);
          const groupsRaw = spec?.groups;
          const itemsRaw = spec?.items;
-         const groups = Array.isArray(groupsRaw)
+
+         const groupIdToIndex = new Map<string, number>();
+         const groupsLabels = Array.isArray(groupsRaw)
             ? groupsRaw
                  .map((g) => {
                     const r = asRecord(g);
-                    return typeof r?.label === "string" ? r.label : "";
+                    const id = typeof r?.id === "string" ? r.id : "";
+                    const label = typeof r?.label === "string" ? r.label : "";
+                    return { id, label };
                  })
-                 .filter((s) => s.length > 0)
+                 .filter((g) => g.label.length > 0)
             : [];
-         const items = Array.isArray(itemsRaw)
+         groupsLabels.forEach((g, i) => {
+            if (g.id) groupIdToIndex.set(g.id, i);
+         });
+
+         const itemIdsAndLabels = Array.isArray(itemsRaw)
             ? itemsRaw
-                 .map((g) => {
-                    const r = asRecord(g);
-                    return typeof r?.label === "string" ? r.label : "";
+                 .map((it) => {
+                    const r = asRecord(it);
+                    const id = typeof r?.id === "string" ? r.id : "";
+                    const label = typeof r?.label === "string" ? r.label : "";
+                    return { id, label };
                  })
-                 .filter((s) => s.length > 0)
+                 .filter((it) => it.label.length > 0)
             : [];
+
+         const ca = asRecord(q.correctAnswer);
+         const assignmentsRaw = Array.isArray(ca?.assignments) ? ca.assignments : [];
+         const itemIdToGroupId = new Map<string, string>();
+         for (const a of assignmentsRaw) {
+            const ar = asRecord(a);
+            if (typeof ar?.itemId === "string" && typeof ar?.groupId === "string") {
+               itemIdToGroupId.set(ar.itemId, ar.groupId);
+            }
+         }
+
          return {
             title,
             description,
             points,
-            groups: groups.map((value) => ({ value })),
-            items: items.map((value) => ({ value })),
+            groups: groupsLabels.map((g) => ({ value: g.label })),
+            items: itemIdsAndLabels.map((it) => {
+               const gid = it.id ? itemIdToGroupId.get(it.id) : undefined;
+               let correctGroupIndex = 0;
+               if (gid !== undefined) {
+                  const idx = groupIdToIndex.get(gid);
+                  if (idx !== undefined) correctGroupIndex = idx;
+               }
+               return { value: it.label, correctGroupIndex };
+            }),
          };
       }
       case EXAM_TASK_TYPE.FillInTheBlank: {
          const spec = asRecord(q.spec);
-         const segmentsRaw = spec?.segments;
-         const segments = Array.isArray(segmentsRaw) ? segmentsRaw : [];
+         const rows = parseFillInBlankSegments(spec?.segments);
 
-         let leadText = "";
-         const blanks: { text: string; acceptedAnswers: string[] }[] = [];
-         let pendingText = "";
-
-         for (const seg of segments) {
-            const s = asRecord(seg);
-            if (!s) continue;
-            const kind = typeof s.kind === "string" ? s.kind : "";
-            if (kind === "text") {
-               pendingText += typeof s.text === "string" ? s.text : "";
-            } else if (kind === "blank") {
-               const answers = Array.isArray(s.acceptedAnswers)
-                  ? s.acceptedAnswers.filter((x): x is string => typeof x === "string" && x.length > 0)
-                  : [];
-               blanks.push({
-                  text: pendingText.trim() || " ",
-                  acceptedAnswers: answers.length ? answers : [""],
-               });
-               pendingText = "";
-            }
+         if (rows.length === 0) {
+            return {
+               title,
+               description,
+               points,
+               blanks: [{ text: " ", acceptedAnswers: [""], afterText: "" }],
+            };
          }
-         leadText = pendingText;
-
-         if (blanks.length === 0) {
-            return { title, description, points, leadText, blanks: [{ text: " ", acceptedAnswers: [""] }] };
-         }
-         return { title, description, points, leadText, blanks };
+         return {
+            title,
+            description,
+            points,
+            blanks: rows.map((r) => ({
+               text: r.text,
+               afterText: r.afterText,
+               acceptedAnswers: r.acceptedAnswers,
+            })),
+         };
       }
-      case EXAM_TASK_TYPE.ShortAnswer:
-         return { title, description, points, rubric };
-      case EXAM_TASK_TYPE.LongAnswer:
-         return { title, description, points, rubric: rubric || " " };
+      case EXAM_TASK_TYPE.ShortAnswer: {
+         const spec = asRecord(q.spec);
+         const acl =
+            typeof spec?.answerLineCount === "number" && Number.isFinite(spec.answerLineCount)
+               ? Math.min(80, Math.max(1, Math.round(spec.answerLineCount)))
+               : 5;
+         return { title, description, points, rubric, answerLineCount: acl };
+      }
+      case EXAM_TASK_TYPE.LongAnswer: {
+         const spec = asRecord(q.spec);
+         const acl =
+            typeof spec?.answerLineCount === "number" && Number.isFinite(spec.answerLineCount)
+               ? Math.min(80, Math.max(1, Math.round(spec.answerLineCount)))
+               : 18;
+         return { title, description, points, rubric: rubric || " ", answerLineCount: acl };
+      }
       default:
          return { title, description, points };
    }
