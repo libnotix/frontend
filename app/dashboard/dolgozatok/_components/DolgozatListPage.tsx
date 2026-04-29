@@ -54,27 +54,27 @@ function DolgozatListPageInner() {
   }, [refresh]);
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] w-full flex-1 flex-col overflow-x-hidden">
-      <div className="flex min-h-0 flex-1 flex-col px-4 pb-10 pt-8 md:px-6 md:pb-12 md:pt-10">
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="min-h-full bg-background p-4 sm:p-6">
+      <div className="mx-auto max-w-7xl space-y-8">
+        <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+              <FileText className="size-6" aria-hidden />
+            </div>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">Dolgozatok</h1>
-              <p className="text-muted-foreground mt-1 max-w-xl text-balance text-sm md:text-base">
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">Dolgozatok</h1>
+              <p className="text-sm text-muted-foreground">
                 Válassz egy meglévő dolgozatot, vagy hozz létre újat.
               </p>
             </div>
-            <Button
-              asChild
-              size="default"
-              className="h-11 shrink-0 gap-1.5 rounded-xl px-5 text-[15px] font-semibold shadow-sm"
-            >
-              <Link href={NEW_EXAM_HREF}>
-                <Plus className="size-4" aria-hidden />
-                Új dolgozat
-              </Link>
-            </Button>
           </div>
+          <Button asChild className="shrink-0 rounded-full">
+            <Link href={NEW_EXAM_HREF}>
+              <Plus className="mr-2 size-4" aria-hidden />
+              Új dolgozat
+            </Link>
+          </Button>
+        </header>
 
           {isLoading ? (
             <div className="flex flex-1 flex-col items-center justify-center py-20 md:min-h-[50vh]">
@@ -127,7 +127,6 @@ function DolgozatListPageInner() {
               })}
             </ul>
           )}
-        </div>
       </div>
     </div>
   );

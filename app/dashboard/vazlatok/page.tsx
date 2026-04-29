@@ -1,10 +1,11 @@
 "use client";
 
-import { memo, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { memo, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { Plus, Edit2, Trash2, FileText, Loader2, BookOpen } from "lucide-react";
 import { CreateDraftRequestFormatEnum } from "@/api";
+import { Button } from "@/components/ui/button";
 
 interface Draft {
   id: string;
@@ -19,6 +20,16 @@ const VazlatokPage = () => {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+  const pathnameRef = useRef(pathname);
+  pathnameRef.current = pathname;
+  const pageActiveRef = useRef(true);
+  useEffect(() => {
+    pageActiveRef.current = true;
+    return () => {
+      pageActiveRef.current = false;
+    };
+  }, []);
 
   const fetchDrafts = async () => {
     try {
@@ -41,6 +52,7 @@ const VazlatokPage = () => {
   }, []);
 
   const handleCreateDraft = async () => {
+    const routeAtStart = pathnameRef.current;
     try {
       setCreating(true);
       const res = await api.draftsPostRaw({
@@ -62,12 +74,16 @@ const VazlatokPage = () => {
       const resJson = await res.raw.json();
       const newDraft = resJson?.draft || resJson;
       if (newDraft && newDraft.id) {
-        router.push(`/dashboard/vazlatok/${newDraft.id}`);
+        if (pageActiveRef.current && pathnameRef.current === routeAtStart) {
+          router.push(`/dashboard/vazlatok/${newDraft.id}`);
+        }
       }
     } catch (error) {
       console.error("Failed to create draft", error);
     } finally {
-      setCreating(false);
+      if (pageActiveRef.current) {
+        setCreating(false);
+      }
     }
   };
 
@@ -96,33 +112,37 @@ const VazlatokPage = () => {
   };
 
   return (
-    <div className="container mx-auto max-w-5xl py-10 px-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-        <div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-foreground flex items-center gap-3">
-            <BookOpen className="w-10 h-10 text-primary" />
-            Vázlatok
-          </h1>
-          <p className="text-muted-foreground mt-2 text-lg">
-            Kezeld és szerkeszd a piszkozataidat, vagy hozz létre újat a
-            szuper-erős AI szerkesztővel.
-          </p>
-        </div>
-        <button
-          onClick={handleCreateDraft}
-          disabled={creating}
-          className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center gap-2 transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {creating ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <Plus className="w-5 h-5" />
-          )}
-          Új Vázlat
-        </button>
-      </div>
+    <div className="min-h-full bg-background p-4 sm:p-6">
+      <div className="mx-auto max-w-7xl space-y-8">
+        <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+              <BookOpen className="size-6" aria-hidden />
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">Vázlatok</h1>
+              <p className="text-sm text-muted-foreground">
+                Kezeld és szerkeszd a piszkozataidat, vagy hozz létre újat a szuper-erős AI
+                szerkesztővel.
+              </p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            className="shrink-0 rounded-full"
+            onClick={handleCreateDraft}
+            disabled={creating}
+          >
+            {creating ? (
+              <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
+            ) : (
+              <Plus className="mr-2 size-4" aria-hidden />
+            )}
+            Új Vázlat
+          </Button>
+        </header>
 
-      {loading ? (
+        {loading ? (
         <div className="flex items-center justify-center p-20">
           <Loader2 className="w-12 h-12 text-primary/40 animate-spin" />
         </div>
@@ -181,6 +201,7 @@ const VazlatokPage = () => {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 };
