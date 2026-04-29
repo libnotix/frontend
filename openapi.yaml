@@ -433,7 +433,7 @@ paths:
                 $ref: "#/components/schemas/ApiResponse"
     delete:
       summary: Delete a school class
-      description: Deletes a school class. Only accessible by admins.
+      description: Deletes a school class. Class members (teachers) or admins; same access as update.
       security:
         - bearerAuth: []
       parameters:
@@ -456,7 +456,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiResponse"
         "403":
-          description: Forbidden — only admins can delete classes
+          description: Forbidden — not a class member
           content:
             application/json:
               schema:
