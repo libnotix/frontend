@@ -17,15 +17,20 @@ import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { AnimatedIsland } from "./AnimatedIsland";
 
-/** Single-segment id under /dashboard/vazlatok — draft editor, not the list route. */
-const DRAFT_EDITOR_PATH = /^\/dashboard\/vazlatok\/[^/]+$/;
+/** Single-segment editor routes render their workspace under the floating navbar. */
+const EDITOR_OVERLAY_PATHS = [
+  /^\/dashboard\/vazlatok\/[^/]+$/,
+  /^\/dashboard\/dolgozatok\/[^/]+$/,
+];
 
 const DashboardNavbar = ({ user }: { user: User }): ReactNode => {
   const pathname = usePathname();
-  const overlayNavbar = pathname != null && DRAFT_EDITOR_PATH.test(pathname);
+  const overlayNavbar =
+    pathname != null && EDITOR_OVERLAY_PATHS.some((path) => path.test(pathname));
 
   return (
     <div
+      data-dashboard-navbar
       className={
         overlayNavbar
           ? "pointer-events-none absolute top-0 left-0 right-0 z-50 flex w-full justify-center"

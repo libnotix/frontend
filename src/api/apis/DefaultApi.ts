@@ -36,8 +36,16 @@ import type {
   DraftLinkIdGet200Response,
   DraftLinkIdPostRequest,
   DraftsIdGet200Response,
+  ExamAiEditRequest,
+  ExamChatMessagePatchRequest,
+  ExamChatsIdGet200Response,
+  ExamChatsIdMessagesMessageIdPatch200Response,
+  ExamChatsIdPost200Response,
   ExamChatsIdPostRequest,
   ExamLinkIdPostRequest,
+  ExamsIdAiEditsPost200Response,
+  ExamsIdAttachDraftPost200Response,
+  ExamsIdAttachDraftPostRequest,
   ExamsIdPutRequest,
   ExamsIdQuestionsPutRequest,
   ExamsIdSubmissionsPostRequest,
@@ -99,10 +107,26 @@ import {
     DraftLinkIdPostRequestToJSON,
     DraftsIdGet200ResponseFromJSON,
     DraftsIdGet200ResponseToJSON,
+    ExamAiEditRequestFromJSON,
+    ExamAiEditRequestToJSON,
+    ExamChatMessagePatchRequestFromJSON,
+    ExamChatMessagePatchRequestToJSON,
+    ExamChatsIdGet200ResponseFromJSON,
+    ExamChatsIdGet200ResponseToJSON,
+    ExamChatsIdMessagesMessageIdPatch200ResponseFromJSON,
+    ExamChatsIdMessagesMessageIdPatch200ResponseToJSON,
+    ExamChatsIdPost200ResponseFromJSON,
+    ExamChatsIdPost200ResponseToJSON,
     ExamChatsIdPostRequestFromJSON,
     ExamChatsIdPostRequestToJSON,
     ExamLinkIdPostRequestFromJSON,
     ExamLinkIdPostRequestToJSON,
+    ExamsIdAiEditsPost200ResponseFromJSON,
+    ExamsIdAiEditsPost200ResponseToJSON,
+    ExamsIdAttachDraftPost200ResponseFromJSON,
+    ExamsIdAttachDraftPost200ResponseToJSON,
+    ExamsIdAttachDraftPostRequestFromJSON,
+    ExamsIdAttachDraftPostRequestToJSON,
     ExamsIdPutRequestFromJSON,
     ExamsIdPutRequestToJSON,
     ExamsIdQuestionsPutRequestFromJSON,
@@ -252,6 +276,12 @@ export interface ExamChatsIdGetRequest {
     id: number;
 }
 
+export interface ExamChatsIdMessagesMessageIdPatchRequest {
+    id: number;
+    messageId: string;
+    examChatMessagePatchRequest: ExamChatMessagePatchRequest;
+}
+
 export interface ExamChatsIdPostOperationRequest {
     id: number;
     examChatsIdPostRequest?: ExamChatsIdPostRequest;
@@ -269,6 +299,18 @@ export interface ExamLinkIdGetRequest {
 export interface ExamLinkIdPostOperationRequest {
     id: number;
     examLinkIdPostRequest?: ExamLinkIdPostRequest;
+}
+
+export interface ExamsIdAiEditsPostRequest {
+    id: number;
+    examAiEditRequest: ExamAiEditRequest;
+    idempotencyKey?: string;
+    xRequestId?: string;
+}
+
+export interface ExamsIdAttachDraftPostOperationRequest {
+    id: number;
+    examsIdAttachDraftPostRequest: ExamsIdAttachDraftPostRequest;
 }
 
 export interface ExamsIdDeleteRequest {
@@ -1653,7 +1695,7 @@ export class DefaultApi extends runtime.BaseAPI {
     /**
      * Get exam chat history
      */
-    async examChatsIdGetRaw(requestParameters: ExamChatsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async examChatsIdGetRaw(requestParameters: ExamChatsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ExamChatsIdGet200Response>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
                 'id',
@@ -1684,20 +1726,84 @@ export class DefaultApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => ExamChatsIdGet200ResponseFromJSON(jsonValue));
     }
 
     /**
      * Get exam chat history
      */
-    async examChatsIdGet(requestParameters: ExamChatsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.examChatsIdGetRaw(requestParameters, initOverrides);
+    async examChatsIdGet(requestParameters: ExamChatsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ExamChatsIdGet200Response> {
+        const response = await this.examChatsIdGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Patch an AI exam edit message status
+     */
+    async examChatsIdMessagesMessageIdPatchRaw(requestParameters: ExamChatsIdMessagesMessageIdPatchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ExamChatsIdMessagesMessageIdPatch200Response>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling examChatsIdMessagesMessageIdPatch().'
+            );
+        }
+
+        if (requestParameters['messageId'] == null) {
+            throw new runtime.RequiredError(
+                'messageId',
+                'Required parameter "messageId" was null or undefined when calling examChatsIdMessagesMessageIdPatch().'
+            );
+        }
+
+        if (requestParameters['examChatMessagePatchRequest'] == null) {
+            throw new runtime.RequiredError(
+                'examChatMessagePatchRequest',
+                'Required parameter "examChatMessagePatchRequest" was null or undefined when calling examChatsIdMessagesMessageIdPatch().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/exam-chats/{id}/messages/{messageId}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+        urlPath = urlPath.replace(`{${"messageId"}}`, encodeURIComponent(String(requestParameters['messageId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PATCH',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ExamChatMessagePatchRequestToJSON(requestParameters['examChatMessagePatchRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ExamChatsIdMessagesMessageIdPatch200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Patch an AI exam edit message status
+     */
+    async examChatsIdMessagesMessageIdPatch(requestParameters: ExamChatsIdMessagesMessageIdPatchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ExamChatsIdMessagesMessageIdPatch200Response> {
+        const response = await this.examChatsIdMessagesMessageIdPatchRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**
      * Exam AI chat (text reply JSON)
      */
-    async examChatsIdPostRaw(requestParameters: ExamChatsIdPostOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async examChatsIdPostRaw(requestParameters: ExamChatsIdPostOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ExamChatsIdPost200Response>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
                 'id',
@@ -1731,14 +1837,15 @@ export class DefaultApi extends runtime.BaseAPI {
             body: ExamChatsIdPostRequestToJSON(requestParameters['examChatsIdPostRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => ExamChatsIdPost200ResponseFromJSON(jsonValue));
     }
 
     /**
      * Exam AI chat (text reply JSON)
      */
-    async examChatsIdPost(requestParameters: ExamChatsIdPostOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.examChatsIdPostRaw(requestParameters, initOverrides);
+    async examChatsIdPost(requestParameters: ExamChatsIdPostOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ExamChatsIdPost200Response> {
+        const response = await this.examChatsIdPostRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**
@@ -1913,6 +2020,124 @@ export class DefaultApi extends runtime.BaseAPI {
      */
     async examsGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
         await this.examsGetRaw(initOverrides);
+    }
+
+    /**
+     * Send a unified exam AI prompt and receive optional edit proposals
+     */
+    async examsIdAiEditsPostRaw(requestParameters: ExamsIdAiEditsPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ExamsIdAiEditsPost200Response>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling examsIdAiEditsPost().'
+            );
+        }
+
+        if (requestParameters['examAiEditRequest'] == null) {
+            throw new runtime.RequiredError(
+                'examAiEditRequest',
+                'Required parameter "examAiEditRequest" was null or undefined when calling examsIdAiEditsPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (requestParameters['idempotencyKey'] != null) {
+            headerParameters['idempotency-key'] = String(requestParameters['idempotencyKey']);
+        }
+
+        if (requestParameters['xRequestId'] != null) {
+            headerParameters['x-request-id'] = String(requestParameters['xRequestId']);
+        }
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/exams/{id}/ai-edits`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ExamAiEditRequestToJSON(requestParameters['examAiEditRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ExamsIdAiEditsPost200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Send a unified exam AI prompt and receive optional edit proposals
+     */
+    async examsIdAiEditsPost(requestParameters: ExamsIdAiEditsPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ExamsIdAiEditsPost200Response> {
+        const response = await this.examsIdAiEditsPostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Materialize a draft as Markdown, upload, and link to exam for AI attachments
+     */
+    async examsIdAttachDraftPostRaw(requestParameters: ExamsIdAttachDraftPostOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ExamsIdAttachDraftPost200Response>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling examsIdAttachDraftPost().'
+            );
+        }
+
+        if (requestParameters['examsIdAttachDraftPostRequest'] == null) {
+            throw new runtime.RequiredError(
+                'examsIdAttachDraftPostRequest',
+                'Required parameter "examsIdAttachDraftPostRequest" was null or undefined when calling examsIdAttachDraftPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/exams/{id}/attach-draft`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ExamsIdAttachDraftPostRequestToJSON(requestParameters['examsIdAttachDraftPostRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ExamsIdAttachDraftPost200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Materialize a draft as Markdown, upload, and link to exam for AI attachments
+     */
+    async examsIdAttachDraftPost(requestParameters: ExamsIdAttachDraftPostOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ExamsIdAttachDraftPost200Response> {
+        const response = await this.examsIdAttachDraftPostRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**

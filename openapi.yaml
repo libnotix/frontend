@@ -1089,6 +1089,85 @@ paths:
           description: OK
         "409":
           description: Cannot remove questions when submissions exist
+  /exams/{id}/ai-edits:
+    post:
+      summary: Send a unified exam AI prompt and receive optional edit proposals
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: idempotency-key
+          in: header
+          required: false
+          schema: { type: string }
+        - name: x-request-id
+          in: header
+          required: false
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExamAiEditRequest"
+      responses:
+        "200":
+          description: AI response with pending edit envelope
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      response:
+                        $ref: "#/components/schemas/ExamAiEditResponse"
+                      reply:
+                        type: string
+                      chatUpdatedAt:
+                        type: string
+                        format: date-time
+        "413":
+          description: File context too large
+  /exams/{id}/attach-draft:
+    post:
+      summary: Materialize a draft as Markdown, upload, and link to exam for AI attachments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [draftId]
+              properties:
+                draftId: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      fileId: { type: integer }
+                      filename: { type: string }
+                      draftId: { type: integer }
+                      draftTitle: { type: string }
+                      draftUpdatedAt: { type: string, format: date-time }
+        "404":
+          description: Draft or exam not found
   /exams/{id}/share:
     post:
       summary: Enable share token for public read-only exam
@@ -1236,11 +1315,26 @@ paths:
                 fileIds:
                   type: array
                   items: { type: integer }
+                attachmentMeta:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/ExamAttachmentMetaItem"
                 idempotencyKey: { type: string }
                 clientTabId: { type: string }
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      reply:
+                        type: string
+                      response:
+                        $ref: "#/components/schemas/ExamAiEditResponse"
     get:
       summary: Get exam chat history
       security:
@@ -1253,6 +1347,54 @@ paths:
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      messages:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/ExamChatMessage"
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        nullable: true
+  /exam-chats/{id}/messages/{messageId}:
+    patch:
+      summary: Patch an AI exam edit message status
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: messageId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExamChatMessagePatchRequest"
+      responses:
+        "200":
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      updatedAt:
+                        type: string
+                        format: date-time
   /submissions/{id}:
     get:
       summary: Get submission with answers and question definitions
@@ -1422,6 +1564,228 @@ components:
           nullable: true
         rubric: { type: string }
         maxPoints: { type: integer, minimum: 1 }
+    ExamAiEditRequest:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+        baseRevision:
+          oneOf:
+            - type: string
+            - type: integer
+          description: Client exam.updatedAt revision used for stale proposal detection.
+        requestId:
+          type: string
+        idempotencyKey:
+          type: string
+        clientTabId:
+          type: string
+        fileIds:
+          type: array
+          items:
+            type: integer
+        attachmentMeta:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExamAttachmentMetaItem"
+        clientQuestions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExamClientQuestionRef"
+    ExamAttachmentMetaItem:
+      type: object
+      required: [fileId]
+      properties:
+        fileId: { type: integer }
+        kind:
+          type: string
+          enum: [file, draft]
+        draftId: { type: integer }
+    ExamClientQuestionRef:
+      type: object
+      required:
+        - clientId
+      properties:
+        clientId:
+          type: string
+        serverId:
+          type: integer
+          nullable: true
+        questionId:
+          type: integer
+          nullable: true
+    NormalizedExamQuestionPayload:
+      type: object
+      required:
+        - title
+        - description
+        - maxPoints
+        - rubric
+        - spec
+        - correctAnswer
+      properties:
+        title: { type: string }
+        description: { type: string }
+        maxPoints: { type: integer, minimum: 1 }
+        rubric: { type: string }
+        spec: {}
+        correctAnswer:
+          nullable: true
+    ExamQuestionEdit:
+      type: object
+      required:
+        - operationId
+        - changeSetId
+        - op
+        - clientId
+        - afterClientId
+        - type
+        - yaml
+      properties:
+        operationId: { type: string }
+        changeSetId: { type: string }
+        op:
+          type: string
+          enum: [update, create, delete, reorder]
+        clientId:
+          type: string
+          nullable: true
+        afterClientId:
+          type: string
+          nullable: true
+        type:
+          allOf:
+            - $ref: "#/components/schemas/ExamQuestionType"
+          nullable: true
+        yaml:
+          type: string
+        normalized:
+          $ref: "#/components/schemas/NormalizedExamQuestionPayload"
+    ExamMetaEdits:
+      type: object
+      properties:
+        titleYaml:
+          type: string
+        rubricYaml:
+          type: string
+    ExamAiEditsEnvelope:
+      type: object
+      required:
+        - status
+        - questionEdits
+      properties:
+        status:
+          type: string
+          enum: [pending, applied, rejected]
+        questionEdits:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExamQuestionEdit"
+        examMetaEdits:
+          $ref: "#/components/schemas/ExamMetaEdits"
+    ExamEditConflict:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum: [stale_revision, invalid_target, invalid_payload, invalid_yaml]
+        message:
+          type: string
+        operationId:
+          type: string
+        clientId:
+          type: string
+          nullable: true
+        expectedRevision:
+          type: string
+        actualRevision:
+          type: string
+        hint:
+          type: string
+    ExamAiEditResponse:
+      type: object
+      required:
+        - reply
+        - hasEdits
+        - changeSetId
+        - baseRevision
+        - resultRevision
+        - edits
+        - conflicts
+        - checksum
+      properties:
+        reply:
+          type: string
+        hasEdits:
+          type: boolean
+        changeSetId:
+          type: string
+        requestId:
+          type: string
+        baseRevision:
+          type: string
+        resultRevision:
+          type: string
+        edits:
+          $ref: "#/components/schemas/ExamAiEditsEnvelope"
+        conflicts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExamEditConflict"
+        checksum:
+          type: string
+    ExamChatAiContent:
+      oneOf:
+        - type: string
+        - $ref: "#/components/schemas/ExamAiEditResponse"
+        - type: object
+          properties:
+            reply:
+              type: string
+    ExamChatMessage:
+      type: object
+      properties:
+        id:
+          type: string
+        role:
+          type: string
+          enum: [user, ai, model, system]
+        content:
+          $ref: "#/components/schemas/ExamChatAiContent"
+        timestamp:
+          type: string
+          format: date-time
+        idempotencyKey:
+          type: string
+        attachedFiles:
+          type: array
+          items:
+            type: object
+            properties:
+              fileId:
+                type: integer
+              filename:
+                type: string
+              kind:
+                type: string
+                enum: [file, draft]
+              draftId:
+                type: integer
+    ExamChatMessagePatchRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [pending, applied, rejected]
+        clientTabId:
+          type: string
     ApiResponse:
       type: object
       properties:

@@ -1,42 +1,80 @@
 "use client";
 
 import { Controller, useFormContext } from "react-hook-form";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { SectionHeader } from "../SectionHeader";
+import { DiffLeaf } from "../aiEdit/diffPrimitives";
 
 type TextAnswerSectionProps = {
-   label?: string;
-   placeholder?: string;
-   /** Long-answer copy hints stricter validation via schema; UI copy only here. */
-   helper?: string;
+   variant: "short" | "long";
 };
 
-export function TextAnswerSection({
-   label = "Válasz / útmutató",
-   placeholder = "Válasz vagy értékelési útmutató...",
-   helper,
-}: TextAnswerSectionProps) {
-   const { control } = useFormContext();
+const COPY = {
+   short: {
+      label: "Mintaválasz / megjegyzés a tanárnak",
+      helper: "Csak neked látszik – emlékeztetőül szolgál a javításhoz. A diák szabályozott számú írósorral kap papírt.",
+      placeholder: "pl. „A fotoszintézis a klorofillban zajlik.” (opcionális)",
+      linesLabel: "Írósorok száma a diáknak",
+      linesHelper: "Előnézeten és nyomtatáskor ennyi vonal jelenik meg a válaszadáshoz.",
+      defaultLines: 5,
+   },
+   long: {
+      label: "Értékelési útmutató",
+      helper: "Add meg a kulcspontokat, várt szöveghosszt vagy követelményeket – ez kötelező mező a hosszú válasznál.",
+      placeholder: "Kulcspontok, szöveghossz, követelmények…",
+      linesLabel: "Írósorok száma a diáknak",
+      linesHelper: "Meghatározza, hogy a feladatlapon hány vonal legyen a kézzel írt válasznak.",
+      defaultLines: 18,
+   },
+} as const;
+
+export function TextAnswerSection({ variant }: TextAnswerSectionProps) {
+   const { control, formState } = useFormContext();
+   const copy = COPY[variant];
+   const error =
+      typeof formState.errors.rubric?.message === "string" ? formState.errors.rubric.message : undefined;
 
    return (
-      <div className="mb-8">
-         <Label className="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-4 block">{label}</Label>
-         {helper ? <p className="text-sm text-muted-foreground mb-2">{helper}</p> : null}
+      <div className="mb-5 space-y-5">
+         <SectionHeader label={copy.linesLabel} helper={copy.linesHelper} />
+         <Controller
+            name="answerLineCount"
+            control={control}
+            render={({ field }) => (
+               <DiffLeaf path="answerLineCount">
+                  <Input
+                     type="number"
+                     min={1}
+                     max={80}
+                     className="max-w-32 bg-muted"
+                     value={field.value ?? copy.defaultLines}
+                     onChange={(e) => {
+                        const v = e.target.valueAsNumber;
+                        field.onChange(Number.isFinite(v) ? v : copy.defaultLines);
+                     }}
+                     onBlur={field.onBlur}
+                     onPointerDown={(e) => e.stopPropagation()}
+                  />
+               </DiffLeaf>
+            )}
+         />
+
+         <SectionHeader label={copy.label} helper={copy.helper} error={error} />
 
          <Controller
             name="rubric"
             control={control}
-            render={({ field, fieldState }) => (
-               <>
+            render={({ field }) => (
+               <DiffLeaf path="rubric">
                   <Textarea
                      {...field}
                      value={field.value ?? ""}
-                     placeholder={placeholder}
-                     className="resize-none h-32 bg-muted/30"
+                     placeholder={copy.placeholder}
+                     className="min-h-24 resize-y bg-muted text-sm leading-snug"
                      onPointerDown={(e) => e.stopPropagation()}
                   />
-                  {fieldState.error?.message ? <p className="text-sm text-destructive mt-1">{fieldState.error.message}</p> : null}
-               </>
+               </DiffLeaf>
             )}
          />
       </div>

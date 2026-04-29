@@ -62,7 +62,7 @@
   --muted-foreground: oklch(0.5273 0.0128 243.8148);
   --accent: oklch(0.9225 0.0027 286.3471);
   --accent-foreground: oklch(0.2154 0.0060 236.8514);
-  --destructive: oklch(0.7982 0.1384 188.8896);
+  --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(1.0000 0 0);
   --border: oklch(0.92 0.004 214.33);
   --input: oklch(0.92 0.004 214.33);
@@ -117,7 +117,7 @@
   --muted-foreground: oklch(0.6734 0.0113 247.9948);
   --accent: oklch(0.2650 0.0061 214.3996);
   --accent-foreground: oklch(0.9349 0.0040 286.3218);
-  --destructive: oklch(0.9127 0.1392 193.3033);
+  --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.9851 0 0);
   --border: oklch(0.28 0.006 214.3996);
   --input: oklch(0.28 0.006 214.3996);
@@ -271,5 +271,36 @@
   }
   100% {
     opacity: 1;
+  }
+}
+
+@media print {
+  /* Egysíkú margó az A4 előnézet belső paddingjéhez igazítva (py-[9mm] px-[12mm]). */
+  @page {
+    margin: 9mm 12mm;
+  }
+
+  html:has([data-exam-print-sheet]),
+  body:has([data-exam-print-sheet]) {
+    height: auto !important;
+    min-height: unset !important;
+    background: #ffffff !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  body:has([data-exam-print-sheet]) [data-dashboard-navbar] {
+    display: none !important;
+  }
+
+  /* Avoid trapping the worksheet in viewport-height layout when exporting to PDF or paper. */
+  body:has([data-exam-print-sheet]) .h-screen {
+    height: auto !important;
+    min-height: unset !important;
+  }
+
+  /* Flex gap eltűnik több böngésző PDF renderében → fix testvérek közti margó a dolgozatlap kérdésblokkjai közt. */
+  body:has([data-exam-print-sheet]) .exam-print-q-gap > * + * {
+    margin-top: 1.25rem !important;
   }
 }

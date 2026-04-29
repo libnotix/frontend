@@ -1,5 +1,6 @@
 import type { ExamQuestionFormSnapshot } from "../examSaveContext";
 import { EXAM_TASK_TYPE, type ExamTaskTypeId } from "../examTaskTypes";
+import { serializeFillInBlankSegments } from "./fillInBlankSegments";
 
 function asRecord(value: unknown): Record<string, unknown> | null {
    if (value && typeof value === "object") return value as Record<string, unknown>;
@@ -57,15 +58,25 @@ export function formValuesToExamSnapshot(
          };
       }
       case EXAM_TASK_TYPE.ShortAnswer:
-      case EXAM_TASK_TYPE.LongAnswer:
+      case EXAM_TASK_TYPE.LongAnswer: {
+         const rawAcl = v.answerLineCount;
+         const fallback = typeId === EXAM_TASK_TYPE.ShortAnswer ? 5 : 18;
+         const aclNum =
+            typeof rawAcl === "number" && Number.isFinite(rawAcl)
+               ? Math.round(rawAcl)
+               : typeof rawAcl === "string" && /^\d+$/.test(rawAcl.trim())
+                 ? Number.parseInt(rawAcl.trim(), 10)
+                 : fallback;
+         const answerLineCount = Math.min(80, Math.max(1, aclNum));
          return {
             title,
             description,
             rubric,
             maxPoints,
-            spec: {},
+            spec: { answerLineCount },
             correctAnswer: null,
          };
+      }
       case EXAM_TASK_TYPE.Matching: {
          const server = asRecord(serverQuestion);
          const specS = asRecord(server?.spec);
@@ -138,7 +149,8 @@ export function formValuesToExamSnapshot(
          const origG = Array.isArray(specS?.groups) ? specS.groups : [];
          const origI = Array.isArray(specS?.items) ? specS.items : [];
          const groupForms = (v.groups as { value: string }[] | undefined) ?? [];
-         const itemForms = (v.items as { value: string }[] | undefined) ?? [];
+         const itemForms =
+            (v.items as { value: string; correctGroupIndex?: number }[] | undefined) ?? [];
          const groups = groupForms.map((g, i) => {
             const o = asRecord(origG[i]);
             const id = typeof o?.id === "string" ? o.id : `g${i}`;
@@ -150,19 +162,15 @@ export function formValuesToExamSnapshot(
             return { id, label: it.value };
          });
 
-         const ca = asRecord(server?.correctAnswer);
-         const assignmentsRaw = Array.isArray(ca?.assignments) ? ca.assignments : [];
-         const itemIdToGroupId = new Map<string, string>();
-         for (const a of assignmentsRaw) {
-            const ar = asRecord(a);
-            if (typeof ar?.itemId === "string" && typeof ar?.groupId === "string") {
-               itemIdToGroupId.set(ar.itemId, ar.groupId);
-            }
-         }
-         const assignments = items.map((it) => ({
-            itemId: it.id,
-            groupId: itemIdToGroupId.get(it.id) ?? groups[0]?.id ?? "g0",
-         }));
+         const assignments = items.map((it, i) => {
+            const idx = itemForms[i]?.correctGroupIndex;
+            const gi =
+               typeof idx === "number" && Number.isFinite(idx) && idx >= 0 && idx < groups.length
+                  ? idx
+                  : 0;
+            const groupId = groups[gi]?.id ?? groups[0]?.id ?? "g0";
+            return { itemId: it.id, groupId };
+         });
 
          return {
             title,
@@ -174,8 +182,8 @@ export function formValuesToExamSnapshot(
          };
       }
       case EXAM_TASK_TYPE.FillInTheBlank: {
-         const leadText = typeof v.leadText === "string" ? v.leadText : "";
-         const blanks = (v.blanks as { text?: string; acceptedAnswers?: string[] }[] | undefined) ?? [];
+         const blanks =
+            (v.blanks as { text?: string; afterText?: string; acceptedAnswers?: string[] }[] | undefined) ?? [];
          const server = asRecord(serverQuestion);
          const specS = asRecord(server?.spec);
          const origSegments = Array.isArray(specS?.segments) ? specS.segments : [];
@@ -185,22 +193,7 @@ export function formValuesToExamSnapshot(
             if (s?.kind === "blank" && typeof s.id === "string") blankIds.push(s.id);
          }
 
-         const segments: Record<string, unknown>[] = [];
-         blanks.forEach((b, i) => {
-            const t = typeof b.text === "string" ? b.text.trim() : "";
-            if (t && t !== " ") segments.push({ kind: "text", text: t });
-            const answers = Array.isArray(b.acceptedAnswers)
-               ? b.acceptedAnswers.filter((x): x is string => typeof x === "string")
-               : [];
-            const blankId = blankIds[i] ?? `blank_${i}`;
-            segments.push({
-               kind: "blank",
-               id: blankId,
-               acceptedAnswers: answers.length ? answers : [""],
-            });
-         });
-         const tail = leadText.trim();
-         if (tail) segments.push({ kind: "text", text: tail });
+         const segments = serializeFillInBlankSegments(blanks, blankIds);
 
          return {
             title,

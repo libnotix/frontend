@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { ExamAttachmentMetaItem } from './ExamAttachmentMetaItem';
+import {
+    ExamAttachmentMetaItemFromJSON,
+    ExamAttachmentMetaItemFromJSONTyped,
+    ExamAttachmentMetaItemToJSON,
+    ExamAttachmentMetaItemToJSONTyped,
+} from './ExamAttachmentMetaItem';
+
 /**
  * 
  * @export
@@ -31,6 +39,12 @@ export interface ExamChatsIdPostRequest {
      * @memberof ExamChatsIdPostRequest
      */
     fileIds?: Array<number>;
+    /**
+     * 
+     * @type {Array<ExamAttachmentMetaItem>}
+     * @memberof ExamChatsIdPostRequest
+     */
+    attachmentMeta?: Array<ExamAttachmentMetaItem>;
     /**
      * 
      * @type {string}
@@ -65,6 +79,7 @@ export function ExamChatsIdPostRequestFromJSONTyped(json: any, ignoreDiscriminat
         
         'message': json['message'],
         'fileIds': json['fileIds'] == null ? undefined : json['fileIds'],
+        'attachmentMeta': json['attachmentMeta'] == null ? undefined : ((json['attachmentMeta'] as Array<any>).map(ExamAttachmentMetaItemFromJSON)),
         'idempotencyKey': json['idempotencyKey'] == null ? undefined : json['idempotencyKey'],
         'clientTabId': json['clientTabId'] == null ? undefined : json['clientTabId'],
     };
@@ -83,6 +98,7 @@ export function ExamChatsIdPostRequestToJSONTyped(value?: ExamChatsIdPostRequest
         
         'message': value['message'],
         'fileIds': value['fileIds'],
+        'attachmentMeta': value['attachmentMeta'] == null ? undefined : ((value['attachmentMeta'] as Array<any>).map(ExamAttachmentMetaItemToJSON)),
         'idempotencyKey': value['idempotencyKey'],
         'clientTabId': value['clientTabId'],
     };

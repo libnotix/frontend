@@ -6,4 +6,6 @@ export type CanvasItem = {
    questionId?: number;
    /** Eredeti kérdés a GET /exams/{id} válaszból — űrlap kitöltéshez */
    loadedQuestion?: unknown;
+   /** Pending AI create-op: links ghost card UI to envelope operation id */
+   ghostOperationId?: string;
 };
