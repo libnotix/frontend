@@ -32,11 +32,14 @@ All URIs are relative to *http://localhost:3000*
 | [**draftsIdPut**](DefaultApi.md#draftsidput) | **PUT** /drafts/{id} | Update a draft |
 | [**draftsPost**](DefaultApi.md#draftspost) | **POST** /drafts | Create a draft |
 | [**examChatsIdGet**](DefaultApi.md#examchatsidget) | **GET** /exam-chats/{id} | Get exam chat history |
+| [**examChatsIdMessagesMessageIdPatch**](DefaultApi.md#examchatsidmessagesmessageidpatch) | **PATCH** /exam-chats/{id}/messages/{messageId} | Patch an AI exam edit message status |
 | [**examChatsIdPost**](DefaultApi.md#examchatsidpostoperation) | **POST** /exam-chats/{id} | Exam AI chat (text reply JSON) |
 | [**examLinkIdDelete**](DefaultApi.md#examlinkiddelete) | **DELETE** /exam-link/{id} | Unlink file |
 | [**examLinkIdGet**](DefaultApi.md#examlinkidget) | **GET** /exam-link/{id} | List linked files |
 | [**examLinkIdPost**](DefaultApi.md#examlinkidpostoperation) | **POST** /exam-link/{id} | Link file to exam |
 | [**examsGet**](DefaultApi.md#examsget) | **GET** /exams | List my exams |
+| [**examsIdAiEditsPost**](DefaultApi.md#examsidaieditspost) | **POST** /exams/{id}/ai-edits | Send a unified exam AI prompt and receive optional edit proposals |
+| [**examsIdAttachDraftPost**](DefaultApi.md#examsidattachdraftpostoperation) | **POST** /exams/{id}/attach-draft | Materialize a draft as Markdown, upload, and link to exam for AI attachments |
 | [**examsIdDelete**](DefaultApi.md#examsiddelete) | **DELETE** /exams/{id} | Delete exam |
 | [**examsIdGet**](DefaultApi.md#examsidget) | **GET** /exams/{id} | Get exam with questions and linked files |
 | [**examsIdPut**](DefaultApi.md#examsidputoperation) | **PUT** /exams/{id} | Update exam metadata |
@@ -1991,7 +1994,7 @@ example().catch(console.error);
 
 ## examChatsIdGet
 
-> examChatsIdGet(id)
+> ExamChatsIdGet200Response examChatsIdGet(id)
 
 Get exam chat history
 
@@ -2038,7 +2041,7 @@ example().catch(console.error);
 
 ### Return type
 
-`void` (Empty response body)
+[**ExamChatsIdGet200Response**](ExamChatsIdGet200Response.md)
 
 ### Authorization
 
@@ -2047,7 +2050,7 @@ example().catch(console.error);
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: Not defined
+- **Accept**: `application/json`
 
 
 ### HTTP response details
@@ -2058,9 +2061,84 @@ example().catch(console.error);
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
 
+## examChatsIdMessagesMessageIdPatch
+
+> ExamChatsIdMessagesMessageIdPatch200Response examChatsIdMessagesMessageIdPatch(id, messageId, examChatMessagePatchRequest)
+
+Patch an AI exam edit message status
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { ExamChatsIdMessagesMessageIdPatchRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const config = new Configuration({ 
+    // Configure HTTP bearer authorization: bearerAuth
+    accessToken: "YOUR BEARER TOKEN",
+  });
+  const api = new DefaultApi(config);
+
+  const body = {
+    // number
+    id: 56,
+    // string
+    messageId: messageId_example,
+    // ExamChatMessagePatchRequest
+    examChatMessagePatchRequest: ...,
+  } satisfies ExamChatsIdMessagesMessageIdPatchRequest;
+
+  try {
+    const data = await api.examChatsIdMessagesMessageIdPatch(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **id** | `number` |  | [Defaults to `undefined`] |
+| **messageId** | `string` |  | [Defaults to `undefined`] |
+| **examChatMessagePatchRequest** | [ExamChatMessagePatchRequest](ExamChatMessagePatchRequest.md) |  | |
+
+### Return type
+
+[**ExamChatsIdMessagesMessageIdPatch200Response**](ExamChatsIdMessagesMessageIdPatch200Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Status updated |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
 ## examChatsIdPost
 
-> examChatsIdPost(id, examChatsIdPostRequest)
+> ExamChatsIdPost200Response examChatsIdPost(id, examChatsIdPostRequest)
 
 Exam AI chat (text reply JSON)
 
@@ -2110,7 +2188,7 @@ example().catch(console.error);
 
 ### Return type
 
-`void` (Empty response body)
+[**ExamChatsIdPost200Response**](ExamChatsIdPost200Response.md)
 
 ### Authorization
 
@@ -2119,7 +2197,7 @@ example().catch(console.error);
 ### HTTP request headers
 
 - **Content-Type**: `application/json`
-- **Accept**: Not defined
+- **Accept**: `application/json`
 
 
 ### HTTP response details
@@ -2400,6 +2478,158 @@ This endpoint does not need any parameter.
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | OK |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## examsIdAiEditsPost
+
+> ExamsIdAiEditsPost200Response examsIdAiEditsPost(id, examAiEditRequest, idempotencyKey, xRequestId)
+
+Send a unified exam AI prompt and receive optional edit proposals
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { ExamsIdAiEditsPostRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const config = new Configuration({ 
+    // Configure HTTP bearer authorization: bearerAuth
+    accessToken: "YOUR BEARER TOKEN",
+  });
+  const api = new DefaultApi(config);
+
+  const body = {
+    // number
+    id: 56,
+    // ExamAiEditRequest
+    examAiEditRequest: ...,
+    // string (optional)
+    idempotencyKey: idempotencyKey_example,
+    // string (optional)
+    xRequestId: xRequestId_example,
+  } satisfies ExamsIdAiEditsPostRequest;
+
+  try {
+    const data = await api.examsIdAiEditsPost(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **id** | `number` |  | [Defaults to `undefined`] |
+| **examAiEditRequest** | [ExamAiEditRequest](ExamAiEditRequest.md) |  | |
+| **idempotencyKey** | `string` |  | [Optional] [Defaults to `undefined`] |
+| **xRequestId** | `string` |  | [Optional] [Defaults to `undefined`] |
+
+### Return type
+
+[**ExamsIdAiEditsPost200Response**](ExamsIdAiEditsPost200Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | AI response with pending edit envelope |  -  |
+| **413** | File context too large |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## examsIdAttachDraftPost
+
+> ExamsIdAttachDraftPost200Response examsIdAttachDraftPost(id, examsIdAttachDraftPostRequest)
+
+Materialize a draft as Markdown, upload, and link to exam for AI attachments
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { ExamsIdAttachDraftPostOperationRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const config = new Configuration({ 
+    // Configure HTTP bearer authorization: bearerAuth
+    accessToken: "YOUR BEARER TOKEN",
+  });
+  const api = new DefaultApi(config);
+
+  const body = {
+    // number
+    id: 56,
+    // ExamsIdAttachDraftPostRequest
+    examsIdAttachDraftPostRequest: ...,
+  } satisfies ExamsIdAttachDraftPostOperationRequest;
+
+  try {
+    const data = await api.examsIdAttachDraftPost(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **id** | `number` |  | [Defaults to `undefined`] |
+| **examsIdAttachDraftPostRequest** | [ExamsIdAttachDraftPostRequest](ExamsIdAttachDraftPostRequest.md) |  | |
+
+### Return type
+
+[**ExamsIdAttachDraftPost200Response**](ExamsIdAttachDraftPost200Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | OK |  -  |
+| **404** | Draft or exam not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
@@ -3691,6 +3921,7 @@ example().catch(console.error);
 | **403** | Forbidden |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
 
 ## submissionsIdAiReviewPost
 

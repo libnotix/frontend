@@ -27,10 +27,10 @@ export function DraftChatRequestBaseRevisionFromJSONTyped(json: any, ignoreDiscr
     if (json == null) {
         return json;
     }
-    if (typeof json === 'string') {
+    if (typeof json === 'number') {
         return json;
     }
-    if (typeof json === 'number') {
+    if (typeof json === 'string') {
         return json;
     }
     return {} as any;
@@ -44,10 +44,10 @@ export function DraftChatRequestBaseRevisionToJSONTyped(value?: DraftChatRequest
     if (value == null) {
         return value;
     }
-    if (typeof value === 'string') {
+    if (typeof value === 'number') {
         return value;
     }
-    if (typeof value === 'number') {
+    if (typeof value === 'string') {
         return value;
     }
     return {};

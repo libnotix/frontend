@@ -8,6 +8,7 @@ Name | Type
 ------------ | -------------
 `message` | string
 `fileIds` | Array&lt;number&gt;
+`attachmentMeta` | [Array&lt;ExamAttachmentMetaItem&gt;](ExamAttachmentMetaItem.md)
 `idempotencyKey` | string
 `clientTabId` | string
 
@@ -20,6 +21,7 @@ import type { ExamChatsIdPostRequest } from ''
 const example = {
   "message": null,
   "fileIds": null,
+  "attachmentMeta": null,
   "idempotencyKey": null,
   "clientTabId": null,
 } satisfies ExamChatsIdPostRequest
