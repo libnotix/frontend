@@ -72,7 +72,7 @@ const LoginPage = () => {
       if (response.accessToken && response.refreshToken) {
         await setAuthCookies(response.accessToken, response.refreshToken);
         toast.success("Sikeres bejelentkezés!");
-        router.push("/");
+        router.push("/dashboard");
       } else {
         toast.error("Hiba: Nem érkezett token.");
       }
