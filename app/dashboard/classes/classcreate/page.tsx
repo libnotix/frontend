@@ -28,8 +28,10 @@ export default function CreateClassPage() {
   const router = useRouter();
   const pathname = usePathname();
   const pathnameRef = useRef(pathname);
-  pathnameRef.current = pathname;
   const pageActiveRef = useRef(true);
+  useEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
   useEffect(() => {
     pageActiveRef.current = true;
     return () => {
@@ -98,6 +100,7 @@ export default function CreateClassPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* eslint-disable-next-line react-hooks/refs -- handleSubmit only calls onSubmit on submit */}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
               <FieldGroup>
                 <Field data-invalid={!!errors.className}>
