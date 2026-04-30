@@ -34,24 +34,37 @@ function DolgozatListPageInner() {
     }
   }, [legacyId, router]);
 
-  const refresh = useCallback(async () => {
+  const runLoad = useCallback(async (isActive: () => boolean) => {
     setIsLoading(true);
     setLoadError(null);
     try {
       const res = await api.examsGetRaw();
       const json = await res.raw.json().catch(() => null);
+      if (!isActive()) return;
       setExams(parseSavedExamsList(json));
     } catch {
+      if (!isActive()) return;
       setLoadError("Nem sikerült betölteni a dolgozatokat.");
       setExams([]);
     } finally {
-      setIsLoading(false);
+      if (isActive()) setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    let active = true;
+    void (async () => {
+      await Promise.resolve();
+      await runLoad(() => active);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [runLoad]);
+
+  const refresh = useCallback(() => {
+    void runLoad(() => true);
+  }, [runLoad]);
 
   return (
     <div className="min-h-full bg-background p-4 sm:p-6">
@@ -84,7 +97,7 @@ function DolgozatListPageInner() {
           ) : loadError ? (
             <div className="ring-foreground/10 bg-card/75 flex flex-col items-center gap-4 rounded-2xl p-10 text-center ring-1 backdrop-blur-sm">
               <p className="text-destructive text-sm md:text-base">{loadError}</p>
-              <Button type="button" variant="secondary" onClick={() => void refresh()}>
+              <Button type="button" variant="secondary" onClick={refresh}>
                 Újra
               </Button>
             </div>
