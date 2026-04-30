@@ -2,7 +2,9 @@ import { getSession } from "@/lib/auth-server";
 import { AuthProvider } from "@/components/AuthProvider";
 import { redirect } from "next/navigation";
 import DashboardNavbar from "@/components/dashboard/Navbar";
-import Link from "next/link";
+
+/** Session uses cookies; avoid static prerender attempts during `next build` (see dynamic-server-error). */
+export const dynamic = "force-dynamic";
 
 export default async function DashboardLayout({
     children,

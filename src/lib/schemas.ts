@@ -27,9 +27,7 @@ export type RegisterInputs = z.infer<typeof registerSchema>;
 export const createClassSchema = z.object({
   className: z.string().trim().min(1, "Add meg az osztály nevét."),
   classNumber: z
-    .number({
-      errorMap: () => ({ message: "Add meg az évfolyamot." }),
-    })
+    .number("Add meg az évfolyamot.")
     .refine(
       (n) => Number.isFinite(n) && !Number.isNaN(n),
       "Add meg az évfolyamot.",

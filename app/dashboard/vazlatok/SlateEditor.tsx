@@ -43,6 +43,8 @@ interface SlateEditorProps {
   renderExternalChat?: () => ReactNode;
   /** Extra classes forwarded to the scrollable content area inside EditorInner. */
   scrollClassName?: string;
+  /** View-only mode (e.g. public share links). */
+  readOnly?: boolean;
 }
 
 const SlateEditor = ({
@@ -58,6 +60,7 @@ const SlateEditor = ({
   externalChat = false,
   renderExternalChat,
   scrollClassName,
+  readOnly = false,
 }: SlateEditorProps) => {
   const [editor] = useState(() => {
     const base = withHistory(withReact(createEditor()));
@@ -214,6 +217,7 @@ const SlateEditor = ({
           : fallbackInitialValue
       }
       onChange={(value) => {
+        if (readOnly) return;
         ensureEditorHasTopLevelNodeIds(editor);
         const isAstChange = editor.operations.some(
           (op) => "set_selection" !== op.type,
@@ -223,7 +227,11 @@ const SlateEditor = ({
         }
       }}
     >
-      {externalChat ? (
+      {readOnly ? (
+        <div className="flex min-h-0 flex-1 flex-col">
+          <EditorInner readOnly scrollClassName={scrollClassName} />
+        </div>
+      ) : externalChat ? (
         <div className="flex flex-col flex-1 min-h-0">
           <EditorInner draftId={draftId} onSave={onSave} scrollClassName={scrollClassName} />
           {renderExternalChat?.()}

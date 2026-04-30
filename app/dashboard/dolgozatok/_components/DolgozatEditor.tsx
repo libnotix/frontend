@@ -419,7 +419,7 @@ function DolgozatEditorWorkspace() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- re-load only when the route id segment changes
   }, [idParam, isNewRoute, isValidRoute]);
 
-  const saveExamRef = useRef<() => Promise<void>>();
+  const saveExamRef = useRef<(() => Promise<void>) | undefined>(undefined);
 
   const saveExam = useCallback(async () => {
     if (!isValidRoute) return;

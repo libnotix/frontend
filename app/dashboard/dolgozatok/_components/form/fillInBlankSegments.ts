@@ -125,7 +125,9 @@ export function serializeFillInBlankSegments(
       const hasNext = i < blanks.length - 1;
       const after = typeof b.afterText === "string" ? b.afterText.trim() : "";
       if (hasNext) {
-         const beforeNext = typeof blanks[i + 1]?.text === "string" ? blanks[i + 1].text.trim() : "";
+         const nextBlank = blanks[i + 1];
+         const beforeNext =
+            typeof nextBlank?.text === "string" ? nextBlank.text.trim() : "";
          if (after && beforeNext) {
             segments.push({ kind: "text", text: after });
             segments.push({ kind: "text", text: beforeNext });

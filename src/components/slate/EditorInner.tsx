@@ -18,10 +18,12 @@ export const EditorInner = ({
   draftId,
   onSave,
   scrollClassName,
+  readOnly = false,
 }: {
   draftId?: string;
   onSave?: (value: SlateEditorNode[]) => void;
   scrollClassName?: string;
+  readOnly?: boolean;
 }) => {
   const editor = useSlate();
   const persistentSelection = usePersistentSelection();
@@ -46,10 +48,11 @@ export const EditorInner = ({
 
   return (
     <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
-      <Toolbar draftId={draftId} />
+      {!readOnly && <Toolbar draftId={draftId} />}
       <div className={`flex-1 overflow-y-auto pb-16 sm:pb-24${scrollClassName ? ` ${scrollClassName}` : ""}`}>
         <div className="mx-auto min-h-[calc(100vh-12rem)] w-full max-w-[860px] py-9 px-8 sm:px-12 md:px-16">
           <Editable
+            readOnly={readOnly}
             decorate={decorate}
             className="vazlat-editable prose max-w-none outline-none dark:prose-invert prose-neutral selection:bg-primary/30 selection:text-foreground"
             renderElement={renderElement}
