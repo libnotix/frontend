@@ -1,12 +1,12 @@
 # TanárSegéd — Frontend fejlesztői útmutató
 
-Ez az útmutató a **TanárSegéd webes frontendjét** fejlesztőknek íródott: alkalmazás felépítése, backend-kapcsolat, autentikáció és adatlekérés, valamint a fő funkciók kóbeli helye. A **tanári, felhasználói viselkedés** leírásához lasd az **[angol](USER_GUIDE.en.md)** vagy **[magyar](USER_GUIDE.hu.md)** felhasználói útmutatót.
+Ez az útmutató a **TanárSegéd webes frontendjét** fejlesztőknek íródott: alkalmazás felépítése, backend-kapcsolat, autentikáció és adatlekérés, valamint a fő funkciók kóbeli helye. **HTTP API részletek:** [Backend fejlesztői útmutató](../../backend/docs/DEV_GUIDE.hu.md). A **tanári, felhasználói viselkedés** leírásához lásd az **[angol](USER_GUIDE.en.md)** vagy **[magyar](USER_GUIDE.hu.md)** felhasználói útmutatót.
 
 ---
 
 ## 1. Bevezetés
 
-A repóban a **TanárSegéd** egy **Next.js** alkalmazás: tanári műszerfal, vázlatszerkesztő, dolgozat folyamatok, osztálykezelés és nyilvános megosztás útvonalak. A **backend külön HTTP API**; a workspace tartalmaz egy **OpenAPI** leírást és belőle generált **TypeScript klienst**, hogy a felület egyezzen a dokumentált végpontokkal.
+A repóban a **TanárSegéd** egy **Next.js** alkalmazás: tanári Dashboard, vázlatszerkesztő, dolgozat folyamatok, osztálykezelés és nyilvános megosztás útvonalak. A **backend külön HTTP API**; a workspace tartalmaz egy **OpenAPI** leírást és belőle generált **TypeScript klienst**, hogy a felület egyezzen a dokumentált végpontokkal.
 
 ---
 
@@ -33,7 +33,7 @@ flowchart LR
 | Stílus | Tailwind CSS 4, `globals.css` |
 | Komponensek | Radix-jellegű primitívek az `src/components/ui/` alatt (shadcn-stílus), CVA, `tailwind-merge` |
 | Űrlapok | `react-hook-form`, `@hookform/resolvers`, Zod |
-| Szerver / kliens adat | TanStack React Query (root layoutban `QueryProvider`) |
+| Szerver / kliens adat | TanStack React Query (root layoutban található `QueryProvider`) |
 | Lokális UI állapot | Zustand (pl. navbar store) |
 | Rich text | Slate, `slate-history`, `slate-react` |
 | Drag and drop | `@dnd-kit/react` / `@dnd-kit/dom` |
@@ -70,9 +70,9 @@ Az útvonalak a `frontend/` mappához képest értendők.
 
 | Változó | Cél |
 |---------|-----|
-| `NEXT_PUBLIC_API_URL` | Backend origin **perjel nélkül**. A [`src/lib/apiBase.ts`](../src/lib/apiBase.ts) `API_BASE_PATH` értéke. |
+| `NEXT_PUBLIC_API_URL` | Backend origin **perjel nélkül**. A [`src/lib/apiBase.ts`](../src/lib/apiBase.ts) `API_BASE_PATH` értéke. Segít a könnyebb deploymentben. |
 
-Ha nincs megadva, az alapértelmezés `http://localhost:3020`. A repóban **nincs commitolt `.env`**; helyben hozz létre `.env.local`-t (vagy a host megfelelőjét).
+Ha nincs megadva, az alapértelmezés `http://localhost:3000`. A repóban **nincs commitolt `.env`**; helyben hozz létre `.env.local`-t (vagy a host megfelelőjét).
 
 ---
 
@@ -104,7 +104,7 @@ Ha a **kanonikus OpenAPI** más repóban él, tartsd **szinkronban** a frontend 
 
 - **Sütik (httpOnly):** `tnrsgd_accessToken`, `tnrsgd_refreshToken` — [`src/actions/auth.ts`](../src/actions/auth.ts) (`setAuthCookies`, `deleteAuthCookies`, `getAuthCookies`).
 - **Session RSC-hez:** [`getSession()`](../src/lib/auth-server.ts) meghívja az `api.authSessionGet()`-et; **401** esetén `refreshTokenAction`, majd újrapróbálkozás.
-- **Védett műszerfal:** [`app/dashboard/layout.tsx`](../app/dashboard/layout.tsx) — nincs session user → **átirányítás** `/auth/login`.
+- **Védett dashboard:** [`app/dashboard/layout.tsx`](../app/dashboard/layout.tsx) — nincs session user → **átirányítás** `/auth/login`.
 - **Kliens kontextus:** [`AuthProvider`](../src/components/AuthProvider.tsx) a dashboard gyerekeit becsomagolja (lásd layout).
 
 Regisztráció és bejelentkezés: **`/auth/register`**, **`/auth/login`** (`app/auth/...`). A **`/createaccount`** útvonal külön oldal — kezeld **másodlagos / legacy** jellegűnek, amíg a termék másként nem rögzíti.
@@ -126,7 +126,7 @@ Regisztráció és bejelentkezés: **`/auth/register`**, **`/auth/login`** (`app
 |---------|-----------|
 | Nyitóoldal | `/` |
 | Auth | `/auth/login`, `/auth/register` |
-| Műszerfal kezdőlap | `/dashboard` |
+| Dashboard kezdőlap | `/dashboard` |
 | Vázlatok | `/dashboard/vazlatok`, `/dashboard/vazlatok/[id]` |
 | Dolgozatok (lista + szerkesztő) | `/dashboard/dolgozatok`, `/dashboard/dolgozatszerkeszto` |
 | Osztályok | `/dashboard/classes`, `/dashboard/classes/classlist`, `/dashboard/classes/classcreate`, `/dashboard/classes/[id]` |
@@ -144,7 +144,7 @@ Regisztráció és bejelentkezés: **`/auth/register`**, **`/auth/login`** (`app
 | **Dolgozatok** | `app/dashboard/dolgozatok/page.tsx`, `app/dashboard/dolgozatszerkeszto/` (canvas, kérdéstípusok, Zod sémák `_components/form/` alatt) |
 | **Osztályok** | `app/dashboard/classes/...` |
 | **Megosztás** | `app/share/vazlatok/[token]/` |
-| **Műszerfal keret** | `src/components/dashboard/` (navbar, dynamic island) |
+| **Dashboard keret** | `src/components/dashboard/` (navbar, dynamic island) |
 
 ---
 
@@ -160,6 +160,8 @@ Regisztráció és bejelentkezés: **`/auth/register`**, **`/auth/login`** (`app
 
 - **Lint:** `npm run lint` / `bun run lint`, **eslint-config-next**.
 - **Tesztek:** a repóban lehetnek **szűk fókuszú unit tesztek** az implementáció mellett (pl. Slate streaming). **Teljes** automatizált lefedettség nincs leírva ebben a csomagban — lint, kézi QA és a csapat CI-je szerint haladj.
+
+A frontend tesztelése magától nem válik szükségessé, de amint a szerver oldal megváltoztatja az endpoint működését (AI szerkesztések kezelése), a tesztek segítenek az integritást kézben tartani. Ez megmenthet minket rengeteg production-ben felbukkanó problémától.
 
 ---
 
@@ -179,7 +181,7 @@ Regisztráció és bejelentkezés: **`/auth/register`**, **`/auth/login`** (`app
 | **RSC** | React Server Components — App Router alapértelmezés. |
 | **Server Action** | `"use server"` függvény (pl. sütik, refresh). |
 | **Vázlat** | Vázlat-dokumentum a Slate szerkesztőben. |
-| **Dolgozat** | Dolgozat modul a műszerfalon. |
+| **Dolgozat** | Dolgozat modul a Dashboardon. |
 
 Ez a dokumentum a **jelen repóbeli frontend** felépítését írja le. **Éles URL-ek, feature flagek és backend viselkedés** eltérhet — mindig ellenőrizd a futó API-val és az aktuális `app/` fával.
 
