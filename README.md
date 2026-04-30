@@ -1,6 +1,12 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+End-user documentation: [English](docs/USER_GUIDE.en.md) · [Hungarian](docs/USER_GUIDE.hu.md).
+
+Developer documentation: [English](docs/DEV_GUIDE.en.md) · [Hungarian](docs/DEV_GUIDE.hu.md).
+
 ## Getting Started
+
+Scripts in `package.json` run Next.js and ESLint via `bun x` (e.g. `bun run dev`). If you use npm or pnpm instead, run the equivalent commands from `package.json` (for example `npx next dev`).
 
 First, run the development server:
 
